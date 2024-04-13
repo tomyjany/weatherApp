@@ -21,6 +21,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '17'
+          
       - name: Set Environment Variables
         run: |
           echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
