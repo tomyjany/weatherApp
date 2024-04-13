@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    environment: env
 
     steps:
       - uses: actions/checkout@v4
@@ -20,9 +21,14 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '17'
+      - name: Set Environment Variables
+        run: |
+          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean install -Dspring.datasource.url=$SPRING_DATASOURCE_URL -Dspring.datasource.username=$SPRING_DATASOURCE_USERNAME -Dspring.datasource.password=$SPRING_DATASOURCE_PASSWORD
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
