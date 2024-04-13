@@ -13,6 +13,7 @@ public class UserRestImpl implements UserRest {
 
     @Autowired
     UserService userService;
+
     @Override
     public ResponseEntity<String> singUp(Map<String, String> requestMap) {
         try{
