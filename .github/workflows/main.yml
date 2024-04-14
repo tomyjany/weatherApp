@@ -1,0 +1,36 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: 
+      - 'development/**'
+      - 'feature/**'
+      - 'main'
+  pull_request:
+    branches: [ "development" ]
+permissions:
+  contents: write
+  security-events: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build and test with Maven
+      run: mvn -B package --file pom.xml
+    - name: Generate JaCoCo coverage report
+      run: mvn clean test jacoco:report
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # Add this line
+        files: ./target/site/jacoco/jacoco.xml
+        fail_ci_if_error: true
