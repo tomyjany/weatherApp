@@ -2,12 +2,13 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: 
+    branches:
       - 'development/**'
       - 'feature/**'
       - 'main'
   pull_request:
     branches: [ "development" ]
+
 permissions:
   contents: write
   security-events: write
@@ -15,27 +16,34 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: env  # Specify the environment to use environment-specific secrets
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build and test with Maven
-      run: |
-        echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
-        echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
-        echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
-      - name: Build with Maven
-        run: mvn clean install -Dspring.datasource.url=$SPRING_DATASOURCE_URL -Dspring.datasource.username=$SPRING_DATASOURCE_USERNAME -Dspring.datasource.password=$SPRING_DATASOURCE_PASSWORD
-    - name: Generate JaCoCo coverage report
-      run: mvn clean test jacoco:report
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }} # Add this line
-        files: ./target/site/jacoco/jacoco.xml
-        fail_ci_if_error: true
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set Environment Variables
+        run: |
+          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Build and test with Maven
+        run: mvn clean install -Pprod  # Specify the Maven profile here
+
+      - name: Generate JaCoCo coverage report
+        run: mvn clean test jacoco:report
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./target/site/jacoco/jacoco.xml
+          fail_ci_if_error: true
+

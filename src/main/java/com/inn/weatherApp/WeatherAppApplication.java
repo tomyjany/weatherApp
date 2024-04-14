@@ -11,7 +11,6 @@ public class WeatherAppApplication {
 
 
 	public static void main(String[] args) {
-		logger.info("Database URL: {}", System.getenv("SPRING_DATASOURCE_URL"));
 		SpringApplication.run(WeatherAppApplication.class, args);
 	}
 
