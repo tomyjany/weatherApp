@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,6 +19,8 @@ import java.util.Objects;
 public class UserServiceImpl implements UserService {
     @Autowired
     UserDao userDao;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Override
     public ResponseEntity<String> signUp(Map<String, String> requestMap) {
         log.info("inside group {}", requestMap);
@@ -52,7 +55,10 @@ public class UserServiceImpl implements UserService {
         user.setFirst_name(requestMap.get("first_name"));
         user.setLast_name(requestMap.get("last_name"));
         user.setEmail(requestMap.get("email"));
-        user.setUser_password(requestMap.get("user_password"));
+        String encoded_password = passwordEncoder.encode(requestMap.get("user_password"));
+
+        //user.setUser_password(requestMap.get("user_password"));
+        user.setUser_password(encoded_password);
         user.setSubscription(1==0);
         return user;
 
