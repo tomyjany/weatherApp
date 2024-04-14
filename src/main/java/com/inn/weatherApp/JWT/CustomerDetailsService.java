@@ -41,7 +41,7 @@ public class CustomerDetailsService implements UserDetailsService {
 
 
         if(!Objects.isNull(userDetail)){
-            return new org.springframework.security.core.userdetails.User(userDetail.getEmail(),userDetail.getUser_password(),new ArrayList<>());
+            return new org.springframework.security.core.userdetails.User(userDetail.getEmail(),userDetail.getUser_password(),authorities);
         }else{
             throw new UsernameNotFoundException("User not Found");
         }
