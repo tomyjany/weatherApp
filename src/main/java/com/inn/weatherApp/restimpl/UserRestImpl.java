@@ -33,4 +33,9 @@ public class UserRestImpl implements UserRest {
         return userService.signIn(requestMap);
     }
 
+    @Override
+    public ResponseEntity<String> testUser() {
+        return WeatherUtility.getResponse("Hello this is USER endpoint!", HttpStatus.OK);
+    }
+
 }
