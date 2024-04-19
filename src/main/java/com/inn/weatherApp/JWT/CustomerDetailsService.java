@@ -32,6 +32,7 @@ public class CustomerDetailsService implements UserDetailsService {
         log.info("log info for loadUserByUsername");
         userDetail = userDao.findByEmail(username);
         List<GrantedAuthority> authorities = new ArrayList<>();
+
         if(userDetail.isSubscription()){
             authorities.add(new SimpleGrantedAuthority("ROLE_SUBSCRIBED"));
         }else{
@@ -41,7 +42,7 @@ public class CustomerDetailsService implements UserDetailsService {
 
 
         if(!Objects.isNull(userDetail)){
-            return new org.springframework.security.core.userdetails.User(userDetail.getEmail(),userDetail.getUser_password(),new ArrayList<>());
+            return new org.springframework.security.core.userdetails.User(userDetail.getEmail(),userDetail.getUser_password(),authorities);
         }else{
             throw new UsernameNotFoundException("User not Found");
         }
