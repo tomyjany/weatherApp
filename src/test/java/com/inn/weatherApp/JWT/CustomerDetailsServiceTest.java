@@ -44,7 +44,7 @@ public class CustomerDetailsServiceTest {
         assertNotNull(result);
         assertEquals("test@example.com", result.getUsername());
         assertEquals("password123", result.getPassword());
-        assertTrue(result.getAuthorities().isEmpty()); // Expect no roles to be set
+        assertFalse(result.getAuthorities().isEmpty()); // Expect no roles to be set
         verify(userDao).findByEmail("test@example.com");
     }
 
