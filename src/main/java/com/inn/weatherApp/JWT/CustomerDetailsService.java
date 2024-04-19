@@ -32,7 +32,7 @@ public class CustomerDetailsService implements UserDetailsService {
         log.info("log info for loadUserByUsername");
         userDetail = userDao.findByEmail(username);
         if(!Objects.isNull(userDetail)){
-            return new org.springframework.security.core.userdetails.User(userDetail.getEmail(),userDetail.getUser_password(),authorities);
+            return new org.springframework.security.core.userdetails.User(userDetail.getEmail(),userDetail.getUser_password(),new ArrayList<>());
         }else{
             throw new UsernameNotFoundException("User not Found");
         }

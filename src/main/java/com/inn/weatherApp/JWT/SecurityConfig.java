@@ -27,7 +27,6 @@ public class SecurityConfig {
 
                         .requestMatchers("/subscriber-only/**").hasAuthority("ROLE_SUBSCRIBED") // Only subscribed users
                         .requestMatchers("/user/signup").permitAll() // Public endpoints
-                        .requestMatchers("/user/signin").permitAll() // Public endpoints
                         .requestMatchers("/public/**").permitAll() // Public endpoints
 
                         .anyRequest().authenticated() // All other endpoints require authentication
