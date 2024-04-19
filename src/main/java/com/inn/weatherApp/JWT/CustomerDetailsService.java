@@ -32,6 +32,7 @@ public class CustomerDetailsService implements UserDetailsService {
         log.info("log info for loadUserByUsername");
         userDetail = userDao.findByEmail(username);
         List<GrantedAuthority> authorities = new ArrayList<>();
+
         if(userDetail.isSubscription()){
             authorities.add(new SimpleGrantedAuthority("ROLE_SUBSCRIBED"));
         }else{
