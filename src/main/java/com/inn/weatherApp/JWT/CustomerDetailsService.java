@@ -31,15 +31,6 @@ public class CustomerDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("log info for loadUserByUsername");
         userDetail = userDao.findByEmail(username);
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        if(userDetail.isSubscription()){
-            authorities.add(new SimpleGrantedAuthority("ROLE_SUBSCRIBED"));
-        }else{
-            authorities.add(new SimpleGrantedAuthority("ROLE_UNSUBSCRIBED"));
-
-        }
-
-
         if(!Objects.isNull(userDetail)){
             return new org.springframework.security.core.userdetails.User(userDetail.getEmail(),userDetail.getUser_password(),authorities);
         }else{
