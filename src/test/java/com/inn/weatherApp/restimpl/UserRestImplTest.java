@@ -63,5 +63,46 @@ public class UserRestImplTest {
         Map<String, Object> responseMap = objectMapper.readValue(response.getBody(), Map.class);
         assertEquals("something went wrong", responseMap.get("message"));
     }
+    @Test
+    public void signIn_MissingCredentials_ReturnsBadRequest() {
+        // Arrange
+        requestMap.remove("user_password");
+
+        // Act
+        ResponseEntity<String> response = userRest.signIn(requestMap);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("Email and password are required"));
+    }
+
+    @Test
+    public void signIn_ValidCredentials_ReturnsSuccessResponse() {
+        // Arrange
+        Map<String, String> validCredentials = new HashMap<>();
+        validCredentials.put("email", "test@example.com");
+        validCredentials.put("user_password", "password123");
+
+        ResponseEntity<String> expectedResponse = ResponseEntity.ok("Login successful");
+        when(userService.signIn(validCredentials)).thenReturn(expectedResponse);
+
+        // Act
+        ResponseEntity<String> response = userRest.signIn(validCredentials);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Login successful", response.getBody());
+        verify(userService).signIn(validCredentials);
+    }
+
+    @Test
+    public void testUser_ReturnsExpectedMessage() {
+        // Act
+        ResponseEntity<String> response = userRest.testUser();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("{\"message\":\"Hello this is USER endpoint!\"}", response.getBody());
+    }
 }
 
