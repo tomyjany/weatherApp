@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,9 @@ public class UserServiceImplTest {
 
     @Mock
     private UserDao userDao;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
 
     @InjectMocks
     private UserServiceImpl userService;
