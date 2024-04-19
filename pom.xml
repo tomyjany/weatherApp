@@ -157,7 +157,7 @@
 					<resource>
 						<directory>src/main/resources</directory>
 						<filtering>true</filtering>
-						<includes>1
+						<includes>
 							<include>application.yml</include>
 
 						</includes>
