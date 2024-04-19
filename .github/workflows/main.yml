@@ -46,4 +46,3 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./target/site/jacoco/jacoco.xml
           slug: tomyjany/weatherApp
-          
