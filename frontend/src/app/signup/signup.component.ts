@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
@@ -22,11 +22,12 @@ export class SignupComponent {
       user_password: this.password
     };
 
-    this.http.post('http://localhost:8080/user/signup', body)
-      .subscribe(
-        response => console.log('Signed up successfully', response),
-        error => console.error('Error signing up ', error)
-      );
+    this.http.post(`${environment.apiBaseUrl}/user/signup`, body)
+      .subscribe({
+
+        next:response => console.log('Signed up successfully', response),
+        error:error => console.error('Error signing up ', error)
+  });
   }
 }
 

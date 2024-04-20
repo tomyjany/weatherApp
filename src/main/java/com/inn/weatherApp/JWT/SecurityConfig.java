@@ -36,10 +36,26 @@ public class SecurityConfig {
                         .requestMatchers("/user/signin").permitAll()
                         .requestMatchers("/user/test").permitAll()
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/signup").permitAll()
+                        .requestMatchers("/index.html").permitAll()
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/*.js").permitAll()
+                        .requestMatchers("/*.css").permitAll()
                         .anyRequest().authenticated())
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults());
+                //.csrf(AbstractHttpConfigurer::disable);
+                .csrf().disable();
+                //.httpBasic(Customizer.withDefaults());
         return http.build();
+
+        /*
+        http
+                .csrf().disable()  // Disable CSRF for testing
+                .authorizeHttpRequests(authz -> authz
+                        .anyRequest().permitAll())  // Temporarily allow all requests
+                .httpBasic(Customizer.withDefaults())
+                .cors().disable();
+        return http.build();
+        */
     }
 
     @Bean
@@ -54,62 +70,3 @@ public class SecurityConfig {
                 .passwordEncoder(passwordEncoder);
     }
 }
-
-/*
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
-
-    private JwtRequestFilter jwtRequestFilter;
-    @Autowired
-    private CustomerDetailsService customerDetailsService;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Bean
-    public JwtRequestFilter jwtRequestFilter(JWTUtil jwtUtil) {
-        return new JwtRequestFilter(jwtUtil);  // Pass the JWTUtil as a constructor argument
-    }
-
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-//                .authorizeHttpRequests((authz) -> authz
-//
-//                        .requestMatchers("/subscriber-only/**").hasAuthority("ROLE_SUBSCRIBED") // Only subscribed users
-//                        .requestMatchers("/user/signup").permitAll() // Public endpoints
-//                        .requestMatchers("/user/signin").permitAll() // Public endpoints
-//                        .requestMatchers("/public/**").permitAll() // Public endpoints
-//
-//                        .anyRequest().authenticated() // All other endpoints require authentication
-//                )
-//                .userDetailsService(customerDetailsService)
-//                .csrf(AbstractHttpConfigurer::disable)
-//                .httpBasic(Customizer.withDefaults()); // This is just an example, you can configure JWT or formLogin here
-//
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                // Existing configurations
-                .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/subscriber-only/**").hasAuthority("ROLE_SUBSCRIBED")
-                        .requestMatchers("/user/signup").permitAll()
-                        .requestMatchers("/user/signin").permitAll()
-                        .requestMatchers("/public/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults());
-        return http.build();
-    }
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(customerDetailsService)
-                .passwordEncoder(com.inn.weatherApp.JWT.PasswordConfig.passwordEncoder());
-    }
-
-}
-
-
-
-*/
