@@ -1,10 +1,13 @@
 <!-- signup.component.html -->
-
 <form class="signup-form">
-    <input type="text" [(ngModel)]="firstName" placeholder="First Name">
-    <input type="text" [(ngModel)]="lastName" placeholder="Last Name">
-    <input type="email" [(ngModel)]="email" placeholder="Email">
-    <input type="password" [(ngModel)]="password" placeholder="Password">
-    <button type="button" (click)="signUp()">Sign Up</button>
-  </form>
+  <input type="text" [(ngModel)]="firstName" placeholder="First Name"[ngModelOptions]="{standalone: true}">
+  <input type="text" [(ngModel)]="lastName" placeholder="Last Name"[ngModelOptions]="{standalone: true}">
+  <input type="email" [(ngModel)]="email" placeholder="Email"[ngModelOptions]="{standalone: true}">
+  <input type="password" [(ngModel)]="password" placeholder="Password"[ngModelOptions]="{standalone: true}">
+  <button type="button" (click)="signUp()">Sign Up</button>
+  <div *ngIf="errorMessage" class="error-message">
+      Error: {{ errorMessage }}
+  </div>
+</form>
+
   

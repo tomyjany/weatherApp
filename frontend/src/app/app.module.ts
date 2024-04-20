@@ -21,8 +21,6 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations'
     HttpClientModule,
     MatFormFieldModule,
     FormsModule,
-    MatInputModule,
-    NoopAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
