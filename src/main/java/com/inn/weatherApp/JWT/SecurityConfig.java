@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/subscriber-only/**").hasAuthority("ROLE_SUBSCRIBED")
                         .requestMatchers("/user/signup").permitAll()
                         .requestMatchers("/user/signin").permitAll()
+                        .requestMatchers("/user/test").permitAll()
                         .requestMatchers("/public/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
