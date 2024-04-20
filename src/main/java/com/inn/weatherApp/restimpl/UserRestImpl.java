@@ -46,12 +46,12 @@ public class UserRestImpl implements UserRest {
     @Override
     public ResponseEntity<String> singUp(Map<String, String> requestMap) {
         log.info(requestMap.toString());
-        try {
             // Validate input map
             if (!validateSignUpMap(requestMap)) {
                 return WeatherUtility.getResponse("Wrong Credentials", HttpStatus.BAD_REQUEST);
             }
             // Proceed with signup if validation passes
+        try {
             return userService.signUp(requestMap);
 
         } catch (Exception ex) {
