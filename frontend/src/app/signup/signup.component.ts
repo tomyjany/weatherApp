@@ -16,7 +16,7 @@ export class SignupComponent {
   constructor(private http: HttpClient) {}
 
   signUp() {
-    console.log("Signing up with:", this.firstName, this.lastName, this.email, this.password);
+    //console.log("Signing up with:", this.firstName, this.lastName, this.email, this.password);
     const body = {
       first_name: this.firstName,
       last_name: this.lastName,
