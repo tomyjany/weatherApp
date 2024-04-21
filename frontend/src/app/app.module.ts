@@ -9,11 +9,15 @@ import {MatFormFieldModule} from '@angular/material/form-field'
 import { FormsModule } from '@angular/forms';
 import {MatInputModule} from '@angular/material/input'
 import {NoopAnimationsModule} from '@angular/platform-browser/animations'
+import { SigninComponent } from './signin/signin.component';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    SignupComponent
+    SignupComponent,
+    SigninComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
