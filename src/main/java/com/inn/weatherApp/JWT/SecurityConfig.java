@@ -41,12 +41,12 @@ public class SecurityConfig {
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers("/*.js").permitAll()
                         .requestMatchers("/*.css").permitAll()
+                        .requestMatchers("/").permitAll()
                         .anyRequest().authenticated())
                 //.csrf(AbstractHttpConfigurer::disable);
                 .csrf().disable();
                 //.httpBasic(Customizer.withDefaults());
         return http.build();
-
         /*
         http
                 .csrf().disable()  // Disable CSRF for testing
