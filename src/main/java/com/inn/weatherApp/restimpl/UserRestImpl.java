@@ -2,6 +2,7 @@ package com.inn.weatherApp.restimpl;
 import com.inn.weatherApp.rest.UserRest;
 import com.inn.weatherApp.service.UserService;
 import com.inn.weatherApp.utils.WeatherUtility;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,11 +10,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 @RestController
+@Slf4j
 public class UserRestImpl implements UserRest {
 
     @Autowired
     UserService userService;
 
+    /*
     @Override
     public ResponseEntity<String> singUp(Map<String, String> requestMap) {
         try{
@@ -23,6 +26,38 @@ public class UserRestImpl implements UserRest {
             ex.printStackTrace();
         }
         return WeatherUtility.getResponse("something went wrong", HttpStatus.BAD_REQUEST);
+    }
+*/
+
+    // Utility method to validate the request map
+    private boolean validateSignUpMap(Map<String, String> requestMap) {
+        for (String key : requestMap.keySet()) {
+            String value = requestMap.get(key);
+            // Check if any field is empty or too short, e.g., less than 3 characters
+            if (value == null || value.trim().length() < 3) {
+                log.info(key);
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    @Override
+    public ResponseEntity<String> singUp(Map<String, String> requestMap) {
+        log.info(requestMap.toString());
+            // Validate input map
+            if (!validateSignUpMap(requestMap)) {
+                return WeatherUtility.getResponse("Wrong Credentials", HttpStatus.BAD_REQUEST);
+            }
+            // Proceed with signup if validation passes
+        try {
+            return userService.signUp(requestMap);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return WeatherUtility.getResponse("something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override

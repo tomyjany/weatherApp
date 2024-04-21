@@ -1,6 +1,8 @@
 package com.inn.weatherApp.serviceImpl;
 
 
+import com.inn.weatherApp.JWT.CustomerDetailsService;
+import com.inn.weatherApp.JWT.JWTUtil;
 import com.inn.weatherApp.dao.UserDao;
 import com.inn.weatherApp.POJO.User;
 import com.inn.weatherApp.utils.WeatherUtility;
@@ -12,10 +14,13 @@ import org.mockito.Mock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,7 +33,12 @@ public class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-
+    @Mock
+    private UserDetails userDetails;
+    @Mock
+    private CustomerDetailsService customerDetailsService;
+    @Mock
+    private JWTUtil jwtUtil;
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -50,8 +60,8 @@ public class UserServiceImplTest {
         invalidRequestMap.put("first_name", "John");
         invalidRequestMap.put("last_name", "Doe");
         invalidRequestMap.put("user_password", "123456");
-    }
 
+    }
     @Test
     public void signUp_ValidRequest_NewUser_ReturnsAccepted() {
         // Arrange
@@ -104,4 +114,69 @@ public class UserServiceImplTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("{\"message\":\"Something went wrong\"}", response.getBody());
     }
+    @Test
+    public void signIn_Successful_ReturnsToken() {
+        // Arrange
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("email", "john.doe@example.com");
+        credentials.put("user_password", "123456");
+
+        UserDetails mockUserDetails = mock(UserDetails.class);
+        when(mockUserDetails.getUsername()).thenReturn("john.doe@example.com");
+        when(mockUserDetails.getPassword()).thenReturn("hashedpassword");
+
+        List<GrantedAuthority> grantedAuthorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        // Use doReturn for setting up the return value of getAuthorities
+        doReturn(grantedAuthorities).when(mockUserDetails).getAuthorities();
+
+        when(customerDetailsService.loadUserByUsername("john.doe@example.com")).thenReturn(mockUserDetails);
+        when(passwordEncoder.matches("123456", mockUserDetails.getPassword())).thenReturn(true);
+        when(jwtUtil.generateToken(anyString(), anyString())).thenReturn("token");
+
+        // Act
+        ResponseEntity<String> response = userService.signIn(credentials);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("token", response.getBody());
+    }
+
+    @Test
+    public void signIn_InvalidPassword_ReturnsUnauthorized() {
+        // Arrange
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("email", "john.doe@example.com");
+        credentials.put("user_password", "wrongpassword");
+
+        UserDetails mockUserDetails = mock(UserDetails.class);
+        when(mockUserDetails.getPassword()).thenReturn("hashedpassword");
+        when(customerDetailsService.loadUserByUsername("john.doe@example.com")).thenReturn(mockUserDetails);
+        when(passwordEncoder.matches("wrongpassword", mockUserDetails.getPassword())).thenReturn(false);
+
+        // Act
+        ResponseEntity<String> response = userService.signIn(credentials);
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("Invalid credentials", response.getBody());
+    }
+
+    @Test
+    public void signIn_UserNotFound_ThrowsUsernameNotFoundException() {
+        // Arrange
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("email", "unknown@example.com");
+        credentials.put("user_password", "123456");
+
+        when(customerDetailsService.loadUserByUsername("unknown@example.com"))
+                .thenThrow(new UsernameNotFoundException("User not found"));
+
+        // Act
+        ResponseEntity<String> response = userService.signIn(credentials);
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("User not found", response.getBody());
+    }
+
 }

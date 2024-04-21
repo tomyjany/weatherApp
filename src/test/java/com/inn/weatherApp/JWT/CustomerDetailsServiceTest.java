@@ -21,41 +21,58 @@ public class CustomerDetailsServiceTest {
     private UserDao userDao;
 
     @InjectMocks
-    private CustomerDetailsService service;
+    private CustomerDetailsService customerDetailsService;
 
     private User user;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         user = new User();
         user.setEmail("test@example.com");
-        user.setUser_password("password123");
+        user.setUser_password("password");
+        user.setSubscription(true); // Assume the user is subscribed
     }
 
     @Test
-    public void loadUserByUsername_userExists_returnsUserDetails() {
-        // Arrange
+    void whenUserFoundAndSubscribed_thenAssignsRoleSubscribed() {
         when(userDao.findByEmail("test@example.com")).thenReturn(user);
 
-        // Act
-        UserDetails result = service.loadUserByUsername("test@example.com");
+        UserDetails userDetails = customerDetailsService.loadUserByUsername("test@example.com");
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("test@example.com", result.getUsername());
-        assertEquals("password123", result.getPassword());
-        assertFalse(result.getAuthorities().isEmpty()); // Expect no roles to be set
-        verify(userDao).findByEmail("test@example.com");
+        assertTrue(userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_SUBSCRIBED")));
+        assertFalse(userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_UNSUBSCRIBED")));
     }
 
     @Test
-    public void loadUserByUsername_userNotFound_throwsUsernameNotFoundException() {
-        // Arrange
+    void whenUserFoundAndNotSubscribed_thenAssignsRoleUnsubscribed() {
+        user.setSubscription(false);
+        when(userDao.findByEmail("test@example.com")).thenReturn(user);
+
+        UserDetails userDetails = customerDetailsService.loadUserByUsername("test@example.com");
+
+        assertTrue(userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_UNSUBSCRIBED")));
+        assertFalse(userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_SUBSCRIBED")));
+    }
+
+    @Test
+    void whenUserNotFound_thenThrowsUsernameNotFoundException() {
         when(userDao.findByEmail("unknown@example.com")).thenReturn(null);
 
-        // Act & Assert
         assertThrows(UsernameNotFoundException.class, () -> {
-            service.loadUserByUsername("unknown@example.com");
+            customerDetailsService.loadUserByUsername("unknown@example.com");
         });
+    }
+
+    @Test
+    void testUserDetailGetter() {
+        user.setEmail("getter@example.com");
+        when(userDao.findByEmail("getter@example.com")).thenReturn(user);
+
+        customerDetailsService.loadUserByUsername("getter@example.com");
+        assertEquals("getter@example.com", customerDetailsService.getUserDetail().getEmail());
     }
 }
