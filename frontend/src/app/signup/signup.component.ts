@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { Route, Router } from '@angular/router';
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
@@ -13,7 +14,7 @@ export class SignupComponent {
   password: string = '';
   errorMessage: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   signUp() {
     //console.log("Signing up with:", this.firstName, this.lastName, this.email, this.password);
@@ -28,6 +29,7 @@ export class SignupComponent {
     .subscribe({
       next: response => {
         console.log('Signed up successfully', response);
+        this.router.navigate(['home']);
         this.errorMessage = '';  // Clear any existing error message
       },
       error: error => {

@@ -1,6 +1,12 @@
-<p>home works!</p>
-<!-- home.component.html -->
-<h1>Welcome to Our Application</h1>
-<p>Explore features here...</p>
-<button routerLink="/signup">Sign Up</button>
-<button routerLink="/signin">Sign In</button>
+<!-- src/app/home/home.component.html -->
+<div *ngIf="isLoggedIn">
+    <h1>Welcome, {{ userEmail }}!</h1>
+    <p *ngIf="isSubscribed">Access to premium content enabled.</p>
+    <p *ngIf="!isSubscribed">Standard access. Consider subscribing for more features.</p>
+    <button (click)="logout()">Logout</button>  <!-- Logout button -->
+  </div>
+  <ng-container *ngIf="!isLoggedIn">
+    <button routerLink="/signin">Sign In</button>
+    <button routerLink="/signup">Sign Up</button>
+  </ng-container>
+  
