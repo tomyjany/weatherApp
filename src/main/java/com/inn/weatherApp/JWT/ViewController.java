@@ -16,3 +16,8 @@ public class ViewController {
         return "redirect:/index.html";
     }
 }
+/*
+public class ViewController{
+
+}
+*/
