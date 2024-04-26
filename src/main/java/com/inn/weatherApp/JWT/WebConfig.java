@@ -35,6 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
 
 
     }
+    /*
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -51,11 +52,32 @@ public class WebConfig implements WebMvcConfigurer {
                     }
                 });
     }
+
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/")
+                .setCachePeriod(0)  // Disable caching for demonstration
+                .resourceChain(true)
+                .addResolver(new PathResourceResolver());
+    }
+    /*
     @Bean
     RouterFunction<ServerResponse> spaRouter() {
         ClassPathResource index = new ClassPathResource("static/index.html");
         return route().resource(path("/"), index).build();
     }
+
+     */
+    @Bean
+    RouterFunction<ServerResponse> spaRouter() {
+        ClassPathResource index = new ClassPathResource("static/index.html");
+        List<String> extensions = Arrays.asList("js", "css", "ico", "png", "jpg", "gif");
+        RequestPredicate spaPredicate = path("/api/**").or(path("/error")).or(pathExtension(extensions::contains)).negate();
+        return route().resource(spaPredicate, index).build();
+    }
+
 }
 /*
 public class WebConfig {

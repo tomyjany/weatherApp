@@ -28,6 +28,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         JwtRequestFilter jwtRequestFilter = jwtRequestFilter();
+        /*
         http
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests((authz) -> authz
@@ -47,16 +48,21 @@ public class SecurityConfig {
                 .csrf().disable();
                 //.httpBasic(Customizer.withDefaults());
         return http.build();
-        /*
+
+
+
+         */
         http
-                .csrf().disable()  // Disable CSRF for testing
+                .csrf().disable()  // If CSRF is not needed, ensure it's disabled
                 .authorizeHttpRequests(authz -> authz
-                        .anyRequest().permitAll())  // Temporarily allow all requests
-                .httpBasic(Customizer.withDefaults())
-                .cors().disable();
+                        .requestMatchers("/*.js", "/*.css", "/*.ico", "/index.html").permitAll()  // Static resources
+                        .requestMatchers("/api/subscriber-only/**").hasAuthority("ROLE_SUBSCRIBED")
+                        .requestMatchers("/**").permitAll())  // Allow all other requests
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-        */
+
     }
+
 
     @Bean
     public JwtRequestFilter jwtRequestFilter() {
