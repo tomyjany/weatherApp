@@ -3,10 +3,9 @@ name: Java CI with Maven
 on:
   push:
     branches:
-      - 'development/**'
-      - 'development'
       - 'tests-**'
       - 'feature/**'
+      - 'feature-**'
   pull_request:
     branches: [ "development" ]
 
