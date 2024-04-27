@@ -54,6 +54,10 @@ jobs:
           cp -R ./frontend/dist/frontend/browser/* ./src/main/resources/static/
         shell : bash
 
+      - name: List files in the static directory
+        run: ls -lah ./src/main/resources/static/
+        shell: bash
+
       - name: Build and test with Maven
         run: mvn clean install -Pprod 
         
