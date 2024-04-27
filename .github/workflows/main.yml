@@ -47,8 +47,12 @@ jobs:
           node-version: '18'
 
       - name : npm install dependencies
-        run: npm run test:coverage
+        run: npm install
         working-directory: './frontend'
+
+      - name : run Angular tests in jest
+        run: npm run test:coverage
+        working-directory: ./frontend
 
 
 
