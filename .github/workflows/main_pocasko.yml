@@ -34,15 +34,23 @@ jobs:
       - name : set up node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '18.18.2'
+          npm-version: '10.5.2'
 
       - name : Install Angular Cli
-        run : npm install -g @angular/cli
+        run : npm install -g @angular/cli@17.3.5
         working-directory: ./frontend
 
       - name: install npm dependencies
         run: npm install
         working-directory: ./frontend
+
+      - name: Check versions
+        run: |
+          node --version
+          npm --version
+          ng --version
+
 
       - name: Build Angular Project
         run: ng build --base-href "/"
