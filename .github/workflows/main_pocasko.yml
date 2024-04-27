@@ -68,7 +68,7 @@ jobs:
 #        shell: bash
 
       - name: Build and test with Maven
-        run: mvn clean install -Pprod
+        run: mvn clean package -Pprod
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -94,7 +94,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'Pocasko'
-          slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AC3A79652F3748EA9820BB9B26ACB76B }}
 
