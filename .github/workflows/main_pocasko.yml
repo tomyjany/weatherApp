@@ -53,9 +53,6 @@ jobs:
           mkdir -p ./src/main/resources/static
           cp -R ./frontend/dist/frontend/browser/* ./src/main/resources/static/
         shell : bash
-        1
-        
-          
 
       - name: Build and test with Maven
         run: mvn clean install -Pprod 
