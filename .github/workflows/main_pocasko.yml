@@ -68,7 +68,7 @@ jobs:
 #        shell: bash
 
       - name: Build and test with Maven
-        run: mvn clean package -Pprod
+        run: mvn package -Pprod
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
