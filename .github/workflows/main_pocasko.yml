@@ -68,7 +68,10 @@ jobs:
 #        shell: bash
 
       - name: Build and test with Maven
-        run: mvn package -Pprod
+        run: mvn clean install -Pprod
+
+      - name: List contents of JAR
+        run: jar tf ./target/*.jar
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
