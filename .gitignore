@@ -5,7 +5,6 @@ target/
 !**/src/test/**/target/
 application.properties
 .azure
-resources/static/*
 
 ### STS ###
 .apt_generated
