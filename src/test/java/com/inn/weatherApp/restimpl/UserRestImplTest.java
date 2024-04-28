@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -153,6 +154,36 @@ public class UserRestImplTest {
 
         // Assert
         assertFalse(result);
+    }
+    @Test
+    public void pay_ValidToken_ReturnsSuccessResponse() {
+        // Arrange
+        String validToken = "validToken";
+
+        ResponseEntity<String> expectedResponse = ResponseEntity.ok("Payment successful");
+        when(userService.pay(validToken)).thenReturn(expectedResponse);
+
+        // Act
+        ResponseEntity<String> response = userRest.pay(validToken);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Payment successful", response.getBody());
+        verify(userService).pay(validToken);
+    }
+
+    @Test
+    public void singUp_InvalidRequestMap_ReturnsBadRequest() {
+        // Arrange
+        Map<String, String> invalidRequestMap = new HashMap<>();
+        invalidRequestMap.put("email", "te"); // Too short to be valid
+
+        // Act
+        ResponseEntity<String> response = userRest.singUp(invalidRequestMap);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody().contains("Wrong Credentials"));
     }
 }
 

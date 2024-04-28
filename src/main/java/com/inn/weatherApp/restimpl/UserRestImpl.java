@@ -51,7 +51,6 @@ public class UserRestImpl implements UserRest {
             if (!validateSignUpMap(requestMap)) {
                 return WeatherUtility.getResponse("Wrong Credentials", HttpStatus.BAD_REQUEST);
             }
-            // Proceed with signup if validation passes
         try {
             return userService.signUp(requestMap);
 
@@ -78,5 +77,6 @@ public class UserRestImpl implements UserRest {
     public ResponseEntity<String> pay(@RequestBody String token) {
         return userService.pay(token);
     }
+
 
 }
