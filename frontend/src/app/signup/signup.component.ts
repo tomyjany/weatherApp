@@ -25,7 +25,7 @@ export class SignupComponent {
       user_password: this.password
   };
 
-  this.http.post(`${environment.apiBaseUrl}/user/signup`, body)
+  this.http.post(`${environment.apiBaseUrl}/api/user/signup`, body)
     .subscribe({
       next: response => {
         console.log('Signed up successfully', response);

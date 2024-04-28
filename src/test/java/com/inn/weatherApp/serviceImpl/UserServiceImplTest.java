@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,6 +45,7 @@ public class UserServiceImplTest {
 
     private Map<String, String> validRequestMap;
     private Map<String, String> invalidRequestMap;
+    private Map<String, String> requestMap;
 
 
     @BeforeEach
@@ -60,6 +62,11 @@ public class UserServiceImplTest {
         invalidRequestMap.put("first_name", "John");
         invalidRequestMap.put("last_name", "Doe");
         invalidRequestMap.put("user_password", "123456");
+
+        requestMap = new HashMap<>();
+        requestMap.put("email", "test@example.com");
+        requestMap.put("user_password", "password123");
+        userDetails = org.mockito.Mockito.mock(UserDetails.class);
 
     }
     @Test
@@ -177,6 +184,28 @@ public class UserServiceImplTest {
         // Assert
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("User not found", response.getBody());
+    }
+
+    @Test
+    public void shouldHandleDataAccessException() {
+        when(customerDetailsService.loadUserByUsername("test@example.com"))
+                .thenThrow(new DataAccessException("Database not reachable") {});
+
+        ResponseEntity<String> response = userService.signIn(requestMap);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Service unavailable", response.getBody());
+    }
+
+    @Test
+    public void shouldHandleUnexpectedException() {
+        when(customerDetailsService.loadUserByUsername("test@example.com"))
+                .thenThrow(new RuntimeException("Unexpected error"));
+
+        ResponseEntity<String> response = userService.signIn(requestMap);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("An unexpected error occurred", response.getBody());
     }
 
 }

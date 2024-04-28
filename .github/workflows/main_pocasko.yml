@@ -8,6 +8,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -28,9 +31,48 @@ jobs:
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
 
+      #- name : set up node.js
+      #  uses: actions/setup-node@v3
+      #  with:
+      #    node-version: '18.18.2'
+      #    npm-version: '10.5.2'
+
+      #- name : Install Angular Cli
+      #  run : npm install -g @angular/cli@17.3.5
+        #working-directory: ./frontend
+#
+#      - name: install npm dependencies
+#        run: npm install
+#        working-directory: ./frontend
+#
+#      - name: Check versions
+#        run: |
+#          node --version
+#          npm --version
+#          ng v
+#        working-directory: ./frontend
+#
+#
+#      - name: Build Angular Project
+#        run: ng build --base-href "/"
+#        working-directory: ./frontend
+#
+#      - name: Copy angular build artifacts
+#        run: |
+#          mkdir -p ./src/main/resources/static
+#          cp -R ./frontend/dist/frontend/browser/* ./src/main/resources/static/
+#        shell : bash
+#
+#      - name: List files in the static directory
+#        run: ls -lah ./src/main/resources/static/
+#        shell: bash
+
       - name: Build and test with Maven
-        run: mvn clean install -Pprod 
-        
+        run: mvn clean install -Pprod
+
+      - name: List contents of JAR
+        run: jar tf ./target/*.jar
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
@@ -55,7 +97,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'Pocasko'
-          slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AC3A79652F3748EA9820BB9B26ACB76B }}
 

@@ -11,4 +11,13 @@ public class ViewController {
     public String forwardToIndex() {
         return "forward:/index.html";
     }
+    @GetMapping("/")
+    public String redirectRoot() {
+        return "redirect:/index.html";
+    }
 }
+/*
+public class ViewController{
+
+}
+*/

@@ -9,7 +9,7 @@ import java.util.Map;
 
 
 
-@RequestMapping(path = "/user")
+@RequestMapping(path = "api/user")
 public interface UserRest {
     @PostMapping(path="/signup")
     public ResponseEntity<String> singUp(@RequestBody() Map<String,String> requestMap);

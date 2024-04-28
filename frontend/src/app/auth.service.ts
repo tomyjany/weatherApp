@@ -13,7 +13,7 @@ export class AuthService {
 
   signIn(email: string, password: string): Observable<any> {
     const body = { email: email, user_password: password };
-    return this.http.post(`${environment.apiBaseUrl}/user/signin`, body, { responseType: 'text' });
+    return this.http.post(`${environment.apiBaseUrl}/api/user/signin`, body, { responseType: 'text' });
   }
 
   saveToken(token: string): void {
