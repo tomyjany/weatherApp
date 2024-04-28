@@ -2,6 +2,7 @@
 <div *ngIf="isLoggedIn">
     <h1>Welcome, {{ userEmail }}!</h1>
     <p *ngIf="isSubscribed">Access to premium content enabled.</p>
+    <button (click)="pay()" *ngIf="!isSubscribed">Pay</button>
     <p *ngIf="!isSubscribed">Standard access. Consider subscribing for more features.</p>
     <button (click)="logout()">Logout</button>  <!-- Logout button -->
   </div>

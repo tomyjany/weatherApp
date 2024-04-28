@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -50,7 +51,6 @@ public class UserRestImpl implements UserRest {
             if (!validateSignUpMap(requestMap)) {
                 return WeatherUtility.getResponse("Wrong Credentials", HttpStatus.BAD_REQUEST);
             }
-            // Proceed with signup if validation passes
         try {
             return userService.signUp(requestMap);
 
@@ -72,5 +72,11 @@ public class UserRestImpl implements UserRest {
     public ResponseEntity<String> testUser() {
         return WeatherUtility.getResponse("Hello this is USER endpoint!", HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<String> pay(@RequestBody String token) {
+        return userService.pay(token);
+    }
+
 
 }
