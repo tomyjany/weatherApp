@@ -10,13 +10,15 @@ import {MatInputModule} from '@angular/material/input'
 import {NoopAnimationsModule} from '@angular/platform-browser/animations'
 import { SigninComponent } from './signin/signin.component';
 import { HomeComponent } from './home/home.component';
+import { SubscribeSuccessComponent } from './subscribe-success/subscribe-success.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SignupComponent,
     SigninComponent,
-    HomeComponent
+    HomeComponent,
+    SubscribeSuccessComponent
   ],
   imports: [
     BrowserModule,

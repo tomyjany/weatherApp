@@ -99,4 +99,24 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
+
+    @Override
+    public ResponseEntity<String> pay(String token) {
+        try {
+            String email = jwtUtil.extractUsername(token);
+            User user = userDao.findByEmail(email);
+            if (user != null) {
+                user.setSubscription(true);
+                userDao.save(user);
+                return WeatherUtility.getResponse("Payment successful, subscription activated", HttpStatus.OK);
+            } else {
+                return WeatherUtility.getResponse("User not found", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return WeatherUtility.getResponse("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
 }

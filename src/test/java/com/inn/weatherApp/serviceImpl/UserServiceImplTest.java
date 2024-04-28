@@ -207,5 +207,55 @@ public class UserServiceImplTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("An unexpected error occurred", response.getBody());
     }
+    @Test
+    public void pay_ValidToken_SubscriptionActivated_ReturnsOk() {
+        // Arrange
+        String validToken = "validToken";
+        User user = new User();
+        user.setEmail("john.doe@example.com");
+
+        when(jwtUtil.extractUsername(validToken)).thenReturn("john.doe@example.com");
+        when(userDao.findByEmail("john.doe@example.com")).thenReturn(user);
+
+        // Act
+        ResponseEntity<String> response = userService.pay(validToken);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("{\"message\":\"Payment successful, subscription activated\"}", response.getBody());
+        assertTrue(user.isSubscription());
+        verify(userDao).save(user);
+    }
+
+    @Test
+    public void pay_ValidToken_UserNotFound_ReturnsBadRequest() {
+        // Arrange
+        String validToken = "validToken";
+
+        when(jwtUtil.extractUsername(validToken)).thenReturn("john.doe@example.com");
+        when(userDao.findByEmail("john.doe@example.com")).thenReturn(null);
+
+        // Act
+        ResponseEntity<String> response = userService.pay(validToken);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("{\"message\":\"User not found\"}", response.getBody());
+    }
+
+    @Test
+    public void pay_ExceptionDuringProcess_ReturnsInternalServerError() {
+        // Arrange
+        String validToken = "validToken";
+
+        when(jwtUtil.extractUsername(validToken)).thenThrow(new RuntimeException("Unexpected error"));
+
+        // Act
+        ResponseEntity<String> response = userService.pay(validToken);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("{\"message\":\"Something went wrong\"}", response.getBody());
+    }
 
 }

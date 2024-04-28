@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/*.js", "/*.css", "/*.ico", "/index.html").permitAll()  // Static resources
                         .requestMatchers("/api/subscriber-only/**").hasAuthority("ROLE_SUBSCRIBED")
+                        .requestMatchers("/api/user/pay").hasAuthority("ROLE_UNSUBSCRIBED")
                         .requestMatchers("/**").permitAll())  // Allow all other requests
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
