@@ -2,7 +2,9 @@ package com.inn.weatherApp.serviceImpl;
 
 import com.inn.weatherApp.JWT.CustomerDetailsService;
 import com.inn.weatherApp.JWT.JWTUtil;
+import com.inn.weatherApp.POJO.FavoriteCity;
 import com.inn.weatherApp.POJO.User;
+import com.inn.weatherApp.dao.FavoriteCityDao;
 import com.inn.weatherApp.dao.UserDao;
 import com.inn.weatherApp.service.UserService;
 import com.inn.weatherApp.utils.WeatherUtility;
@@ -16,16 +18,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
     @Autowired
     UserDao userDao;
+    @Autowired
+    FavoriteCityDao favoriteCityDao;
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
@@ -130,6 +131,53 @@ public class UserServiceImpl implements UserService {
         User user = userDao.findByApiKey(apiKey);
         return user != null;
     }
+
+    @Override
+    public Integer findUserByEmailAddress(String email) {
+        User user = userDao.findByEmail(email);
+        if (user != null) {
+            return user.getId();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> addFavoriteCity(String email,String city) {
+        User user = userDao.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+        }
+
+        List<FavoriteCity> favoriteCities = user.getFavoriteCities();
+        for (FavoriteCity favoriteCity : favoriteCities) {
+            if (favoriteCity.getCityName().equals(city)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("City is already in the list of favorite cities");
+            }
+        }
+
+        FavoriteCity newFavoriteCity = new FavoriteCity();
+        newFavoriteCity.setCityName(city);
+        newFavoriteCity.setUser(user);
+        favoriteCityDao.save(newFavoriteCity);
+
+        return ResponseEntity.ok("City added to favorite cities");
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getFavoriteCities(String email) {
+        User user = userDao.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        List<FavoriteCity> favoriteCities = user.getFavoriteCities();
+        List<String> cityNames = new ArrayList<>();
+        for (FavoriteCity favoriteCity : favoriteCities) {
+            cityNames.add(favoriteCity.getCityName());
+        }
+
+        return ResponseEntity.ok(cityNames);    }
 
 
 }

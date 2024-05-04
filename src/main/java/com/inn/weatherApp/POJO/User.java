@@ -10,6 +10,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 @NamedQuery(name = "User.findByEmail", query = "select u from User u where u.email=:email")
@@ -44,6 +45,9 @@ public class User implements Serializable {
 
     @Column(name="api_key")
     private String api_key;
+
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoriteCity> favoriteCities;
 
 
 
