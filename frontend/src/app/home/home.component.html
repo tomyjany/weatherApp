@@ -4,6 +4,7 @@
     <p *ngIf="isSubscribed">Access to premium content enabled.</p>
     <button (click)="pay()" *ngIf="!isSubscribed">Pay</button>
     <p *ngIf="!isSubscribed">Standard access. Consider subscribing for more features.</p>
+    <p *ngIf="isSubscribed">This is your API key: {{ apiKey }}</p>
     <button (click)="logout()">Logout</button>  <!-- Logout button -->
   </div>
   <ng-container *ngIf="!isLoggedIn">
@@ -11,3 +12,4 @@
     <button routerLink="/signup">Sign Up</button>
   </ng-container>
   
+<app-weather></app-weather>

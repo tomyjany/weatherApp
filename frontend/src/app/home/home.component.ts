@@ -12,6 +12,7 @@ export class HomeComponent implements OnInit{
   isLoggedIn: boolean = false;
   userEmail: string | null = null;
   isSubscribed: boolean = false;
+  apiKey: string | null = null;
 
   constructor(private authService: AuthService, private http: HttpClient, private router: Router) {}
 
@@ -23,6 +24,9 @@ export class HomeComponent implements OnInit{
     if (this.isLoggedIn) {
       this.userEmail = this.authService.getUserEmail();
       this.isSubscribed = this.authService.isSubscribed();
+      if (this.isSubscribed) {
+        this.apiKey = this.authService.getApiKey();
+      }
     }
 
   }

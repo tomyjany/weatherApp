@@ -11,6 +11,7 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations'
 import { SigninComponent } from './signin/signin.component';
 import { HomeComponent } from './home/home.component';
 import { SubscribeSuccessComponent } from './subscribe-success/subscribe-success.component';
+import { WeatherComponent } from './weather/weather.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { SubscribeSuccessComponent } from './subscribe-success/subscribe-success
     SignupComponent,
     SigninComponent,
     HomeComponent,
-    SubscribeSuccessComponent
+    SubscribeSuccessComponent,
+    WeatherComponent
   ],
   imports: [
     BrowserModule,
