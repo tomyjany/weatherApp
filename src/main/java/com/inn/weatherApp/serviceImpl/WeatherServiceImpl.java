@@ -48,6 +48,7 @@ public class WeatherServiceImpl implements WeatherService {
 
         String url = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s",
                 coordinates[1], coordinates[0], apiKey);
+        log.info("coordinates for current weather: {}, {}", coordinates[0], coordinates[1]);
 
         String response;
         try {
@@ -57,7 +58,8 @@ public class WeatherServiceImpl implements WeatherService {
         }
 
         try {
-            return ResponseEntity.ok(parseResponse(response));
+            Map<String, Object> parsedResponse = parseCurrentWeatherResponse(response, city, coordinates[0], coordinates[1]);
+            return ResponseEntity.ok(parsedResponse);
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error parsing the API response"));
         }
@@ -122,6 +124,68 @@ public class WeatherServiceImpl implements WeatherService {
 
         return ResponseEntity.ok(finalResponse);
     }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> getForecastWeather(String city) {
+        double[] coordinates;
+        try {
+            coordinates = getLonLat(city);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error getting coordinates for the city"));
+        }
+
+        String url = String.format("https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=%s&lon=%s&cnt=1&appid=%s",
+                coordinates[1], coordinates[0], apiKey);
+        log.info("coordinates for forecast weather: {}, {}", coordinates[0], coordinates[1]);
+
+        String response;
+        try {
+            response = restTemplate.getForObject(url, String.class);
+        } catch (RestClientException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error making the API call"));
+        }
+
+        try {
+            Map<String, Object> parsedResponse = parseForecastWeatherResponse(response, city, coordinates[0], coordinates[1]);
+            return ResponseEntity.ok(parsedResponse);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error parsing the API response"));
+        }
+    }
+    private Map<String, Object> parseForecastWeatherResponse(String response, String city, double lon, double lat) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(response);
+
+        Map<String, Object> weatherData = new HashMap<>();
+
+        // Extract the weather description and icon
+        JsonNode listNode = root.get("list");
+        if (listNode != null && listNode.isArray() && listNode.size() > 0) {
+            JsonNode weatherNode = listNode.get(0).get("weather");
+            if (weatherNode != null && weatherNode.isArray() && weatherNode.size() > 0) {
+                String weatherDescription = weatherNode.get(0).get("description").asText();
+                String icon = weatherNode.get(0).get("icon").asText();
+                weatherData.put("description", weatherDescription);
+                weatherData.put("icon", icon);
+            }
+
+            // Extract the time
+            long time = listNode.get(0).get("dt").asLong();
+            weatherData.put("time", time);
+        }
+
+        // Add city, lon, lat to the response
+        weatherData.put("city", city);
+        weatherData.put("lon", lon);
+        weatherData.put("lat", lat);
+
+        if (weatherData.isEmpty()) {
+            weatherData.put("error", "No weather data available");
+        }
+
+        return weatherData;
+    }
+
     public double[] getLonLat(String city) throws JsonProcessingException {
         String url = String.format("http://api.openweathermap.org/geo/1.0/direct?q=%s&limit=1&appid=%s", city, apiKey);
         String response = restTemplate.getForObject(url, String.class);
@@ -156,6 +220,36 @@ public class WeatherServiceImpl implements WeatherService {
                 weatherData.put("time", time);
             }
         }
+
+        if (weatherData.isEmpty()) {
+            weatherData.put("error", "No weather data available");
+        }
+
+        return weatherData;
+    }
+    private Map<String, Object> parseCurrentWeatherResponse(String response, String city, double lon, double lat) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(response);
+
+        Map<String, Object> weatherData = new HashMap<>();
+
+        // Extract the weather description and icon
+        JsonNode weatherNode = root.get("weather");
+        if (weatherNode != null && weatherNode.isArray() && weatherNode.size() > 0) {
+            String weatherDescription = weatherNode.get(0).get("description").asText();
+            String icon = weatherNode.get(0).get("icon").asText();
+            weatherData.put("description", weatherDescription);
+            weatherData.put("icon", icon);
+        }
+
+        // Extract the time
+        long time = root.get("dt").asLong();
+        weatherData.put("time", time);
+
+        // Add city, lon, lat to the response
+        weatherData.put("city", city);
+        weatherData.put("lon", lon);
+        weatherData.put("lat", lat);
 
         if (weatherData.isEmpty()) {
             weatherData.put("error", "No weather data available");

@@ -12,6 +12,8 @@ public interface Weather {
     @GetMapping(path = "/current")
     public ResponseEntity<Map<String, Object>> getCurrentWeather(@RequestParam("c") String city,@RequestParam("k") String apiKey);
     @GetMapping(path = "/historical")
-    public ResponseEntity<Map<String, Object>> getHistoricalWeather(@RequestParam("c") String city, @RequestParam("d") String date);
+    public ResponseEntity<Map<String, Object>> getHistoricalWeather(@RequestParam("c") String city, @RequestParam("d") String date,@RequestParam("k") String apiKey);
+    @GetMapping(path = "/forecast")
+    public ResponseEntity<Map<String, Object>> getForecastWeather(@RequestParam("c") String city,@RequestParam("k") String apiKey);
 
 }

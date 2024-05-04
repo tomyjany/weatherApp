@@ -21,6 +21,9 @@ public class WeatherImpl implements Weather {
     private final WeatherService weatherService;
     private final UserService userService;
 
+    @Value("${frontend.apiKey}")
+    private String frontendApiKey;
+
     public WeatherImpl(WeatherService weatherService, UserService userService) {
         this.weatherService = weatherService;
         this.userService = userService;
@@ -29,14 +32,26 @@ public class WeatherImpl implements Weather {
 
     @Override
     public ResponseEntity<Map<String, Object>> getCurrentWeather(String city, String apiKey) {
-        if(!userService.validateApiKey(apiKey)){
+        if(!apiKey.equals(frontendApiKey) && !userService.validateApiKey(apiKey)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid API Key"));
         }
         return weatherService.getCurrentWeather(city);
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> getHistoricalWeather(String city, String date) {
+    public ResponseEntity<Map<String, Object>> getHistoricalWeather(String city, String date, String apiKey) {
+        if(!apiKey.equals(frontendApiKey) && !userService.validateApiKey(apiKey)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid API Key"));
+        }
         return weatherService.getHistoricalWeather(city, date);
     }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> getForecastWeather(String city, String apiKey) {
+        if(!apiKey.equals(frontendApiKey) && !userService.validateApiKey(apiKey)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid API Key"));
+        }
+        return weatherService.getForecastWeather(city);
+    }
+
 }
