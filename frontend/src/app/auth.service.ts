@@ -11,17 +11,28 @@ import { Router } from '@angular/router';
 export class AuthService {
   constructor(private http: HttpClient,private router: Router) {}
 
-  signIn(email: string, password: string): Observable<any> {
+  signIn(email: string, password: string): Observable<{ token: string, apiKey: string | null }> {
     const body = { email: email, user_password: password };
-    return this.http.post(`${environment.apiBaseUrl}/api/user/signin`, body, { responseType: 'text' });
+    return this.http.post<{ token: string, apiKey: string | null }>(`${environment.apiBaseUrl}/api/user/signin`, body);
   }
 
-  saveToken(token: string): void {
-    localStorage.setItem('accessToken', token);
+  saveTokenAndApiKey(response: { token: string, apiKey: string | null }): void {
+    console.log('Response: ', response);
+    localStorage.setItem('accessToken', response.token);
+    if (response.apiKey) {
+      localStorage.setItem('apiKey', response.apiKey);
+    }
   }
+
 
   getToken(): string | null {
-    return localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
+    console.log('Saved token: ', token);
+    return token;
+  }
+
+  getApiKey(): string | null {
+    return localStorage.getItem('apiKey');
   }
 
   isLoggedIn(): boolean {

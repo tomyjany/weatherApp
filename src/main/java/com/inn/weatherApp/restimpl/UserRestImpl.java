@@ -61,9 +61,9 @@ public class UserRestImpl implements UserRest {
     }
 
     @Override
-    public ResponseEntity<String> signIn(Map<String, String> requestMap) {
+    public ResponseEntity<Map<String,String>> signIn(Map<String, String> requestMap) {
         if (!requestMap.containsKey("email") || !requestMap.containsKey("user_password")) {
-            return WeatherUtility.getResponse("Email and password are required", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Email and password are required"));
         }
         return userService.signIn(requestMap);
     }

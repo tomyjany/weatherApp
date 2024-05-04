@@ -11,7 +11,7 @@ public interface UserRest {
     @PostMapping(path="/signup")
     public ResponseEntity<String> singUp(@RequestBody() Map<String,String> requestMap);
     @PostMapping(path="/signin")
-    public ResponseEntity<String> signIn(@RequestBody() Map<String,String> requestMap);
+    public ResponseEntity<Map<String,String>> signIn(@RequestBody() Map<String,String> requestMap);
     @PostMapping(path="/test")
     public ResponseEntity<String> testUser();
     @PutMapping(path="/pay")

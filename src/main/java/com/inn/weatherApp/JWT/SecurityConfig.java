@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -75,5 +77,9 @@ public class SecurityConfig {
         auth
                 .userDetailsService(customerDetailsService)
                 .passwordEncoder(passwordEncoder);
+    }
+    @Bean
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
     }
 }

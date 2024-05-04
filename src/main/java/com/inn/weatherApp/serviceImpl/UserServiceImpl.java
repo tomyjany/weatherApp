@@ -16,8 +16,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -77,26 +79,29 @@ public class UserServiceImpl implements UserService {
 
     }
     @Override
-    public ResponseEntity<String> signIn(Map<String,String> requestMap) {
+    public ResponseEntity<Map<String,String>> signIn(Map<String,String> requestMap) {
         try {
             UserDetails userDetails = customerDetailsService.loadUserByUsername(requestMap.get("email"));
             if (passwordEncoder.matches(requestMap.get("user_password"), userDetails.getPassword())) {
                 String role = userDetails.getAuthorities().iterator().next().getAuthority();
                 String token = jwtUtil.generateToken(userDetails.getUsername(),role);
-                return ResponseEntity.ok(token);  // Return the token in the response body
+                User user = userDao.findByEmail(requestMap.get("email"));
+                String apiKey = user.getApi_key();
+                Map<String,String> response = new HashMap<>();
+                response.put("token",token);
+                response.put("apiKey",apiKey);
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid credentials"));
             }
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not found"));
         } catch (DataAccessException e) {
-            // This catches exceptions like database not reachable
             log.error("Database access issue: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Service unavailable");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Service unavailable"));
         } catch (Exception e) {
-            // Catching unexpected exceptions
             log.error("Unexpected error occurred: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "An unexpected error occurred"));
         }
     }
 
@@ -107,6 +112,8 @@ public class UserServiceImpl implements UserService {
             User user = userDao.findByEmail(email);
             if (user != null) {
                 user.setSubscription(true);
+                String apiKey = UUID.randomUUID().toString();
+                user.setApi_key(apiKey);
                 userDao.save(user);
                 return WeatherUtility.getResponse("Payment successful, subscription activated", HttpStatus.OK);
             } else {
@@ -116,6 +123,12 @@ public class UserServiceImpl implements UserService {
             ex.printStackTrace();
         }
         return WeatherUtility.getResponse("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public boolean validateApiKey(String apiKey) {
+        User user = userDao.findByApiKey(apiKey);
+        return user != null;
     }
 
 

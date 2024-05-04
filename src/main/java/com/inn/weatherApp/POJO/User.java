@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 
 @NamedQuery(name = "User.findByEmail", query = "select u from User u where u.email=:email")
-
+@NamedQuery(name = "User.findByApiKey", query = "select u from User u where u.api_key=:api_key")
 
 @Entity
 @DynamicInsert
@@ -41,6 +41,9 @@ public class User implements Serializable {
 
     @Column(name="subscription")
     private boolean subscription;
+
+    @Column(name="api_key")
+    private String api_key;
 
 
 
