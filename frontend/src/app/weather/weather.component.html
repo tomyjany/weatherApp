@@ -1,4 +1,6 @@
+<!--
 <div class="weather-container">
+
     <div class="input-container">
       <input type="text" placeholder="Enter city" #cityInput>
       <input type="date" #dateInput>
@@ -28,4 +30,86 @@
           <img [src]="'https://openweathermap.org/img/wn/' + weather.icon + '@2x.png'" alt="Weather icon">
         </div>
       </div>
+</div>
+<div class="weather-container">
+    <div class="input-container">
+        <input type="text" placeholder="Enter city" #cityInput>
+        <input type="date" #dateInput [disabled]="!isUserSubscribed()">
+        <button (click)="updateWeatherUserInput(cityInput.value, dateInput.value)">Update Weather</button>
+        <button (click)="addCityToFavorites(cityInput.value)">Add to Favorites</button>
+      </div>
+      
+      <div class="favorite-cities">
+        <h2>Favorite Cities</h2>
+        <button *ngFor="let city of favoriteCities" (click)="updateWeatherFromFavorites(city)">{{city}}</button>
+      </div>
+  
+    <div class="current-weather">
+      <h2>Current Weather</h2>
+      <p *ngIf="currentWeather">City: {{currentWeather.city}}</p>
+      <p *ngIf="currentWeather">Description: {{currentWeather.description}}</p>
+      <img *ngIf="currentWeather" [src]="currentWeather.iconUrl" alt="Weather icon">
+    </div>
+    <div class="forecast-weather" *ngIf="forecastWeather">
+      <h2>Forecast Weather</h2>
+      <p>City: {{forecastWeather.city}}</p>
+      <p>Description: {{forecastWeather.description}}</p>
+      <img [src]="forecastWeather.iconUrl" alt="Weather icon">
+    </div>
+  
+    <div class="historical-weather" *ngIf="historicalWeather">
+        <h2>Historical Weather</h2>
+        <p>Date: {{selectedDate | date:'fullDate'}}</p>
+        <div *ngFor="let weather of historicalWeather.data">
+          <p>City: {{weather.city}}</p>
+          <p>Description: {{weather.description}}</p>
+          <p>Time: {{convertUnixTime(weather.time) | date:'shortTime'}}</p>
+          <img [src]="'https://openweathermap.org/img/wn/' + weather.icon + '@2x.png'" alt="Weather icon">
+        </div>
+      </div>
+</div>
+-->
+<div class="weather-container">
+    <div class="input-container">
+        <input type="text" placeholder="Enter name of city, ZIP CODE, Country Code" #cityInput>
+        <button (click)="updateWeatherUserInput(cityInput.value, defaultDate)">Update Weather</button>
+    </div>
+    <div class="current-weather">
+        <h2>Current Weather</h2>
+        <p *ngIf="currentWeather">City: {{currentWeather.city}}</p>
+        <div *ngIf="isUserSubscribed()">
+            <button [disabled]="!currentWeather" (click)="addCityToFavorites()">Add to Favorites</button>
+        </div>
+        <p *ngIf="currentWeather">Description: {{currentWeather.description}}</p>
+        <img *ngIf="currentWeather" [src]="currentWeather.iconUrl" alt="Weather icon">
+    </div>
+
+    <div class="forecast-weather" *ngIf="forecastWeather">
+        <h2>Forecast Weather</h2>
+        <p>City: {{forecastWeather.city}}</p>
+        <p>Description: {{forecastWeather.description}}</p>
+        <img [src]="forecastWeather.iconUrl" alt="Weather icon">
+    </div>
+    <div *ngIf="isUserSubscribed()">
+        <div class="input-container">
+            <input type="date" #dateInput>
+            <button (click)="updateWeatherUserInput(selectedCity, dateInput.value)">Update Weather for Specific Date</button>
+        </div>
+
+        <div class="favorite-cities">
+            <h2>Favorite Cities</h2>
+            <button *ngFor="let city of favoriteCities" (click)="updateWeatherFromFavorites(city)">{{city}}</button>
+        </div>
+
+        <div class="historical-weather" *ngIf="historicalWeather">
+            <h2>Historical Weather</h2>
+            <p class="date">Date: {{selectedDate | date:'fullDate'}}</p>
+            <div *ngFor="let weather of historicalWeather.data">
+                <p>City: {{weather.city}}</p>
+                <p>Description: {{weather.description}}</p>
+                <p>Time: {{convertUnixTime(weather.time) | date:'shortTime' : 'CET'}}</p>
+                <img [src]="'https://openweathermap.org/img/wn/' + weather.icon + '@2x.png'" alt="Weather icon">
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,0 +1,141 @@
+/* Responsive CSS for the weather container */
+
+.weather-container {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.input-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.input-container input {
+    flex: 1;
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.input-container button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+}
+
+.input-container button:disabled {
+    background-color: #ccc;
+}
+
+.current-weather,
+.forecast-weather,
+.historical-weather {
+    margin-bottom: 20px;
+}
+
+.favorite-cities {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.favorite-cities button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.favorite-cities button:hover {
+    background-color: #0056b3;
+}
+
+.current-weather button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.current-weather button:hover {
+    background-color: #1e7e34;
+}
+
+.current-weather button:disabled {
+    background-color: #ccc;
+}
+
+.historical-weather {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.historical-weather div {
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.historical-weather p {
+    margin: 0 0 10px 0;
+}
+
+.historical-weather img {
+    max-width: 100%;
+    height: auto;
+}
+
+h2 {
+    color: #007BFF;
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+.date {
+    font-size: 1.2em;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+
+/* Responsive CSS for smaller screens */
+
+@media only screen and (max-width: 600px) {
+    .input-container {
+        flex-direction: column;
+    }
+
+    .input-container input {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .favorite-cities {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+
+    .historical-weather div {
+        padding: 10px;
+    }
+}

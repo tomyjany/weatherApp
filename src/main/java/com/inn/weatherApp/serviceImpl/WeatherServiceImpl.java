@@ -1,18 +1,19 @@
 package com.inn.weatherApp.serviceImpl;
 
+import Objects.CityInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inn.weatherApp.service.WeatherService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,16 +40,17 @@ public class WeatherServiceImpl implements WeatherService {
 
     @Override
     public ResponseEntity<Map<String, Object>> getCurrentWeather(String city) {
-        double[] coordinates;
+        CityInfo cityInfo;
         try {
-            coordinates = getLonLat(city);
+            cityInfo = getLonLat(city);
+            log.info("coordinates for current weather: {}, {}", cityInfo.getLatitude(), cityInfo.getLongitude());
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error getting coordinates for the city"));
         }
 
         String url = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s",
-                coordinates[1], coordinates[0], apiKey);
-        log.info("coordinates for current weather: {}, {}", coordinates[0], coordinates[1]);
+                cityInfo.getLatitude(), cityInfo.getLongitude(), apiKey);
+        log.info("coordinates for current weather: {}, {}", cityInfo.getLatitude(), cityInfo.getLongitude());
 
         String response;
         try {
@@ -58,7 +60,7 @@ public class WeatherServiceImpl implements WeatherService {
         }
 
         try {
-            Map<String, Object> parsedResponse = parseCurrentWeatherResponse(response, city, coordinates[0], coordinates[1]);
+            Map<String, Object> parsedResponse = parseCurrentWeatherResponse(response,cityInfo.getName(), cityInfo.getLatitude(), cityInfo.getLongitude());
             return ResponseEntity.ok(parsedResponse);
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error parsing the API response"));
@@ -68,10 +70,10 @@ public class WeatherServiceImpl implements WeatherService {
 
     @Override
     public ResponseEntity<Map<String, Object>> getHistoricalWeather(String city, String date) {
-        double[] coordinates;
+        CityInfo cityInfo;
         try {
-            coordinates = getLonLat(city);
-            log.info("Coordinates: {}, {}", coordinates[0], coordinates[1]);
+            cityInfo = getLonLat(city);
+            log.info("Coordinates: {}, {}", cityInfo.getLatitude(), cityInfo.getLongitude());
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error getting coordinates for the city"));
         }
@@ -85,10 +87,10 @@ public class WeatherServiceImpl implements WeatherService {
         }
 
         ZonedDateTime[] times = new ZonedDateTime[] {
-                localDate.atTime(6, 59).atZone(ZoneOffset.UTC),
-                localDate.atTime(11, 59).atZone(ZoneOffset.UTC),
-                localDate.atTime(17, 59).atZone(ZoneOffset.UTC),
-                localDate.atTime(22, 59).atZone(ZoneOffset.UTC)
+                localDate.atTime(6, 59).atZone(ZoneId.of("CET")),
+                localDate.atTime(11, 59).atZone(ZoneId.of("CET")),
+                localDate.atTime(17, 59).atZone(ZoneId.of("CET")),
+                localDate.atTime(22, 59).atZone(ZoneId.of("CET"))
         };
 
         long[] timestamps = new long[times.length];
@@ -100,17 +102,17 @@ public class WeatherServiceImpl implements WeatherService {
         for (long timestamp : timestamps) {
             try {
                 String url = String.format("https://history.openweathermap.org/data/2.5/history/city?lat=%s&lon=%s&type=hour&start=%s&cnt=1&appid=%s",
-                        coordinates[1], coordinates[0], timestamp, apiKey);
+                        cityInfo.getLatitude(),cityInfo.getLongitude(), timestamp, apiKey);
                 log.info("Requesting data for Unix timestamp: {}", timestamp);
                 String response = restTemplate.getForObject(url, String.class);
-                Map<String, Object> parsedResponse = parseResponse(response);
+                Map<String, Object> parsedResponse = parseHistoricalWeatherResponse(response);
                 if (parsedResponse.containsKey("error")) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(parsedResponse);
                 }
-                parsedResponse.put("time", timestamp);
-                parsedResponse.put("city", city);
-                parsedResponse.put("lon", coordinates[0]);
-                parsedResponse.put("lat", coordinates[1]);
+                //parsedResponse.put("time", timestamp);
+                parsedResponse.put("city", cityInfo.getName());
+                parsedResponse.put("lon", cityInfo.getLatitude());
+                parsedResponse.put("lat", cityInfo.getLongitude());
                 weatherDataList.add(parsedResponse);
             } catch (RestClientException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error making the API call" + e.getMessage()));
@@ -127,16 +129,16 @@ public class WeatherServiceImpl implements WeatherService {
 
     @Override
     public ResponseEntity<Map<String, Object>> getForecastWeather(String city) {
-        double[] coordinates;
+        CityInfo cityInfo;
         try {
-            coordinates = getLonLat(city);
+            cityInfo = getLonLat(city);
+            log.info("coordinates for forecast weather: {}, {}", cityInfo.getLatitude(), cityInfo.getLongitude());
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error getting coordinates for the city"));
         }
 
         String url = String.format("https://pro.openweathermap.org/data/2.5/forecast/hourly?lat=%s&lon=%s&cnt=1&appid=%s",
-                coordinates[1], coordinates[0], apiKey);
-        log.info("coordinates for forecast weather: {}, {}", coordinates[0], coordinates[1]);
+                cityInfo.getLatitude(),cityInfo.getLongitude(), apiKey);
 
         String response;
         try {
@@ -146,7 +148,7 @@ public class WeatherServiceImpl implements WeatherService {
         }
 
         try {
-            Map<String, Object> parsedResponse = parseForecastWeatherResponse(response, city, coordinates[0], coordinates[1]);
+            Map<String, Object> parsedResponse = parseForecastWeatherResponse(response,cityInfo.getName() , cityInfo.getLatitude(),cityInfo.getLatitude());
             return ResponseEntity.ok(parsedResponse);
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error parsing the API response"));
@@ -186,19 +188,20 @@ public class WeatherServiceImpl implements WeatherService {
         return weatherData;
     }
 
-    public double[] getLonLat(String city) throws JsonProcessingException {
+    public CityInfo getLonLat(String city) throws JsonProcessingException {
         String url = String.format("http://api.openweathermap.org/geo/1.0/direct?q=%s&limit=1&appid=%s", city, apiKey);
         String response = restTemplate.getForObject(url, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response);
 
+        String correctedCityName = root.get(0).get("name").asText();
         double latitude = root.get(0).get("lat").asDouble();
         double longitude = root.get(0).get("lon").asDouble();
 
-        return new double[]{longitude, latitude};
+        return new CityInfo(correctedCityName, longitude, latitude);
     }
-    private Map<String, Object> parseResponse(String response) throws JsonProcessingException {
+    private Map<String, Object> parseHistoricalWeatherResponse(String response) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response);
 
@@ -221,13 +224,14 @@ public class WeatherServiceImpl implements WeatherService {
             }
         }
 
+
         if (weatherData.isEmpty()) {
             weatherData.put("error", "No weather data available");
         }
 
         return weatherData;
     }
-    private Map<String, Object> parseCurrentWeatherResponse(String response, String city, double lon, double lat) throws JsonProcessingException {
+    private Map<String, Object> parseCurrentWeatherResponse(String response,String city, double lon, double lat) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response);
 
@@ -240,6 +244,7 @@ public class WeatherServiceImpl implements WeatherService {
             String icon = weatherNode.get(0).get("icon").asText();
             weatherData.put("description", weatherDescription);
             weatherData.put("icon", icon);
+            weatherData.put("city",city);
         }
 
         // Extract the time
@@ -247,7 +252,6 @@ public class WeatherServiceImpl implements WeatherService {
         weatherData.put("time", time);
 
         // Add city, lon, lat to the response
-        weatherData.put("city", city);
         weatherData.put("lon", lon);
         weatherData.put("lat", lat);
 

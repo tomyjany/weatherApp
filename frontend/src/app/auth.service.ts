@@ -60,4 +60,23 @@ export class AuthService {
     localStorage.removeItem('accessToken');  // Clear the token from storage
     this.router.navigate(['']);       // Redirect to the sign-in page
   }
+  addFavoriteCity(city: string): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+  
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.post(`${environment.apiBaseUrl}/api/user/addfavorite?c=${city}`, null, { headers });
+  }
+  
+  getFavoriteCities(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+  
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.get(`${environment.apiBaseUrl}/api/user/favorites`, { headers });
+  }
 }
