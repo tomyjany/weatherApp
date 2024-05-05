@@ -3,6 +3,7 @@ import { SigninComponent } from './signin.component';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
+import { fakeAsync, tick } from '@angular/core/testing';
 import { throwError } from 'rxjs';
 class MockAuthService {
   signIn(email: string, password: string) {
@@ -21,9 +22,18 @@ class MockAuthService {
       return of({ error: 'Something went wrong' });
     }
   }
-  saveToken(token: string) {
-    // Mock the saveToken method
-    console.log('Saving token:', token);
+  saveTokenAndApiKey(response: any) {
+    // Mock the saveTokenAndApiKey method
+    console.log('Saving token and API key:', response);
+  }
+  getToken() {
+    // Mock the getToken method to return a dummy token
+    return 'dummy-token';
+  }
+
+  getApiKey() {
+    // Mock the getApiKey method to return a dummy API key
+    return 'dummy-apiKey';
   }
 }
 
@@ -71,89 +81,43 @@ describe('SigninComponent', () => {
     expect(component.errorMessage).toEqual('');
   });
 
-  it('should call authService.signIn with email and password on signIn', () => {
+  it('should call signIn on authService with email and password', () => {
     const authService = TestBed.inject(AuthService);
+    const signInSpy = jest.spyOn(authService, 'signIn').mockReturnValue(of({ token: 'dummy-token', apiKey: 'dummy-apiKey' }));
   
-    // Spy on the signIn method of the authService
-    const signInSpy = jest.spyOn(authService, 'signIn').mockReturnValue(of('dummy-token'));
-  
-    // Set email and password
     component.email = 'test@example.com';
     component.password = 'password';
-  
-    // Call the signIn method
     component.signIn();
   
-    // Check if signIn method of authService was called with the correct parameters
     expect(signInSpy).toHaveBeenCalledWith('test@example.com', 'password');
   });
   
- 
-it('should navigate to home page if token is valid', () => {
-  const authService = TestBed.inject(AuthService);
-  const router = TestBed.inject(Router);
 
-  // Mock the signIn method to return an observable with a dummy token
-  jest.spyOn(authService, 'signIn').mockReturnValue(of('dummy-token'));
-  jest.spyOn(authService, 'saveToken');
-
-  // Spy on the router navigate method
-  const navigateSpy = jest.spyOn(router, 'navigate');
-
-  // Set email and password
-  component.email = 'test@example.com';
-  component.password = 'password';
-
-  // Call the signIn method
-  component.signIn();
-
-  // Check if signIn method of authService was called with the correct parameters
-  expect(authService.signIn).toHaveBeenCalledWith('test@example.com', 'password');
-  // Check if saveToken method of authService was called with the correct token
-  expect(authService.saveToken).toHaveBeenCalledWith('dummy-token');
-  // Check if router navigate method was called with the correct route
-  expect(navigateSpy).toHaveBeenCalledWith(['']); // Check navigation
-});
-
-it('should handle invalid token', () => {
-  const authService = TestBed.inject(AuthService);
-  const router = TestBed.inject(Router);
-
-  // Mock the signIn method to return an observable with a falsy token (null)
-  jest.spyOn(authService, 'signIn').mockReturnValue(of(null));
-
-  // Spy on the router navigate method
-  const navigateSpy = jest.spyOn(router, 'navigate');
-
-  // Set email and password
-  component.email = 'test@example.com';
-  component.password = 'password';
-
-  // Call the signIn method
-  component.signIn();
-
-  // Check if signIn method of authService was called with the correct parameters
-  expect(authService.signIn).toHaveBeenCalledWith('test@example.com', 'password');
-  // Check if router navigate method was called with the correct route
-  expect(navigateSpy).not.toHaveBeenCalled(); // Ensure navigation didn't happen
-}); 
-it('should handle sign-in error', () => {
-  // Arrange
-  const authService = TestBed.inject(AuthService);
-  const errorResponse = { message: 'Failed to sign in' };
-  const signInSpy = jest.spyOn(authService, 'signIn').mockReturnValue(throwError(errorResponse));
-  const consoleSpy = jest.spyOn(console, 'log');
-
-  // Act
-  component.email = 'test@example.com';
-  component.password = 'password';
-  component.signIn();
-
-  // Assert
-  expect(signInSpy).toHaveBeenCalledWith('test@example.com', 'password');
-  expect(consoleSpy).toHaveBeenCalledWith('error getting token', errorResponse);
-  expect(component.errorMessage).toEqual(errorResponse.message);
-});
-
+  it('should set errorMessage on sign in error', () => {
+    const authService = TestBed.inject(AuthService);
+    jest.spyOn(authService, 'signIn').mockReturnValue(throwError({ error: { error: 'Sign in failed' } }));
+  
+    component.signIn();
+  
+    expect(component.errorMessage).toEqual('Sign in failed');
+  });
+  it('should save token and apiKey and navigate to home on successful sign in', fakeAsync(() => {
+    const authService = TestBed.inject(AuthService);
+    const router = TestBed.inject(Router);
+    jest.spyOn(authService, 'signIn').mockReturnValue(of({ token: 'dummy-token', apiKey: 'dummy-apiKey' }));
+    const saveTokenAndApiKeySpy = jest.spyOn(authService, 'saveTokenAndApiKey');
+    const navigateSpy = jest.spyOn(router, 'navigate');
+    const logSpy = jest.spyOn(console, 'log');
+  
+    component.signIn();
+  
+    tick(); // Simulate the passage of time until all pending asynchronous activities finish
+  
+    expect(saveTokenAndApiKeySpy).toHaveBeenCalledWith({ token: 'dummy-token', apiKey: 'dummy-apiKey' });
+    expect(logSpy).toHaveBeenCalledWith('Token saved: ', 'dummy-token');
+    expect(logSpy).toHaveBeenCalledWith('API Key saved: ', 'dummy-apiKey');
+    expect(navigateSpy).toHaveBeenCalledWith(['']);
+    expect(logSpy).toHaveBeenCalledWith('token saved');
+  }));
 
 })

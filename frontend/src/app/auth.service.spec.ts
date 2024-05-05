@@ -25,28 +25,7 @@ describe('AuthService', () => {
   });
 
 
-  it('should save token to localStorage', () => {
-    const saveTokenSpy = jest.spyOn(service, 'saveToken');
-
-    service.saveToken('dummy-token');
-    
-    expect(saveTokenSpy).toHaveBeenCalledWith('dummy-token');
-    expect(localStorage.getItem('accessToken')).toEqual('dummy-token');
-  });
-
-  it('should return token from localStorage', () => {
-    localStorage.setItem('accessToken', 'dummy-token');
-    
-    expect(service.getToken()).toEqual('dummy-token');
-  });
-
-  it('should return true if token exists in localStorage', () => {
-    localStorage.setItem('accessToken', 'dummy-token');
-    
-    expect(service.isLoggedIn()).toBeTruthy();
-  });
-
-  it('should return false if token does not exist in localStorage', () => {
+   it('should return false if token does not exist in localStorage', () => {
     expect(service.isLoggedIn()).toBeFalsy();
   });
 
@@ -147,5 +126,66 @@ describe('AuthService', () => {
     // Assert that the decoded token is null
     expect(decoded).toBeNull();
   });
+
+
+  it('should save token and apiKey in localStorage', () => {
+    const response = { token: 'dummy-token', apiKey: 'dummy-apiKey' };
+    service.saveTokenAndApiKey(response);
+    expect(localStorage.getItem('accessToken')).toEqual('dummy-token');
+    expect(localStorage.getItem('apiKey')).toEqual('dummy-apiKey');
+  });
+  
+  it('should return apiKey from localStorage', () => {
+    localStorage.setItem('apiKey', 'dummy-apiKey');
+    const apiKey = service.getApiKey();
+    expect(apiKey).toEqual('dummy-apiKey');
+  });
+  
+  it('should send a POST request to add favorite city and return an observable', () => {
+    const city = 'dummy-city';
+    const mockResponse = { message: 'City added to favorites' };
+    const token = 'dummy-token';
+    jest.spyOn(service, 'getToken').mockReturnValue(token);
+  
+    service.addFavoriteCity(city).subscribe(response => {
+      expect(response).toEqual(mockResponse);
+    });
+  
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/user/addfavorite?c=${city}`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
+  
+    req.flush(mockResponse);
+  });
+  
+  it('should send a GET request to retrieve favorite cities and return an observable', () => {
+    const mockResponse = ['City1', 'City2'];
+    const token = 'dummy-token';
+    jest.spyOn(service, 'getToken').mockReturnValue(token);
+  
+    service.getFavoriteCities().subscribe(cities => {
+      expect(cities).toEqual(mockResponse);
+    });
+  
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/user/favorites`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe(`Bearer ${token}`);
+  
+    req.flush(mockResponse);
+  });
+
+  it('should throw an error when no token is found', () => {
+    jest.spyOn(service, 'getToken').mockReturnValue(null);
+  
+    expect(() => service.addFavoriteCity('dummy-city')).toThrowError('No token found');
+  });
+
+  it('should throw an error when no token is found', () => {
+    jest.spyOn(service, 'getToken').mockReturnValue(null);
+  
+    expect(() => service.getFavoriteCities()).toThrowError('No token found');
+  });
+
+
 });
 

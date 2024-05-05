@@ -5,13 +5,20 @@ import { environment } from '../../environments/environment';
 import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { NgZone } from '@angular/core';
-// Define a mock class for AuthService
+import { Component } from '@angular/core';
+@Component({
+  selector: 'app-weather',
+  template: '',
+
+})
+class WeatherComponentStub {}
 class MockAuthService {
   isLoggedIn = jest.fn().mockReturnValue(false);
   getUserEmail = jest.fn().mockReturnValue(null);
   isSubscribed = jest.fn().mockReturnValue(false);
   logout = jest.fn();
   getToken = jest.fn().mockReturnValue('test-token');
+  getApiKey = jest.fn().mockReturnValue('test-api-key');
 }
 let router: Router;
 describe('HomeComponent', () => {
@@ -25,7 +32,7 @@ describe('HomeComponent', () => {
     mockAuthService = new MockAuthService();
     await TestBed.configureTestingModule({
       imports : [HttpClientTestingModule],
-      declarations: [HomeComponent],
+      declarations: [HomeComponent,WeatherComponentStub],
       providers: [{ provide: AuthService, useValue: mockAuthService }],
     }).compileComponents();
     fixture = TestBed.createComponent(HomeComponent);
