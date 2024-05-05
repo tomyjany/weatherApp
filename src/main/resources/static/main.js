@@ -34413,7 +34413,8 @@ var VERSION4 = new Version("17.3.5");
 // src/environments/environment.ts
 var environment = {
   production: false,
-  apiBaseUrl: "http://localhost:8080"
+  apiBaseUrl: "http://localhost:8080",
+  apiKey: "StinJeNejlepsiPredmet"
 };
 
 // node_modules/@angular/forms/fesm2022/forms.mjs
@@ -40501,10 +40502,10 @@ _SignupComponent.\u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type:
     \u0275\u0275advance(3);
     \u0275\u0275property("ngIf", ctx.errorMessage);
   }
-}, dependencies: [NgIf, \u0275NgNoValidate, DefaultValueAccessor, NgControlStatus, NgControlStatusGroup, NgModel, NgForm] });
+}, dependencies: [NgIf, \u0275NgNoValidate, DefaultValueAccessor, NgControlStatus, NgControlStatusGroup, NgModel, NgForm], styles: ["\n\n.signup-form[_ngcontent-%COMP%] {\n  font-family: Arial, sans-serif;\n  max-width: 600px;\n  margin: 0 auto;\n  padding: 20px;\n  background-color: #f9f9f9;\n  border-radius: 5px;\n  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);\n}\n.signup-form[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  display: block;\n  width: 100%;\n  padding: 10px;\n  border-radius: 5px;\n  border: 1px solid #ccc;\n  margin-bottom: 20px;\n}\n.signup-form[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  padding: 10px 20px;\n  border: none;\n  border-radius: 5px;\n  background-color: #007BFF;\n  color: white;\n  cursor: pointer;\n  transition: background-color 0.3s ease;\n}\n.signup-form[_ngcontent-%COMP%]   button[_ngcontent-%COMP%]:hover {\n  background-color: #0056b3;\n}\n.error-message[_ngcontent-%COMP%] {\n  color: red;\n  margin-top: 10px;\n}\n/*# sourceMappingURL=signup.component.css.map */"] });
 var SignupComponent = _SignupComponent;
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(SignupComponent, { className: "SignupComponent" });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(SignupComponent, { className: "SignupComponent", filePath: "src/app/signup/signup.component.ts", lineNumber: 10 });
 })();
 
 // node_modules/jwt-decode/build/esm/index.js
@@ -40571,13 +40572,20 @@ var _AuthService = class _AuthService {
   }
   signIn(email, password) {
     const body = { email, user_password: password };
-    return this.http.post(`${environment.apiBaseUrl}/api/user/signin`, body, { responseType: "text" });
+    return this.http.post(`${environment.apiBaseUrl}/api/user/signin`, body);
   }
-  saveToken(token) {
-    localStorage.setItem("accessToken", token);
+  saveTokenAndApiKey(response) {
+    localStorage.setItem("accessToken", response.token);
+    if (response.apiKey) {
+      localStorage.setItem("apiKey", response.apiKey);
+    }
   }
   getToken() {
-    return localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken");
+    return token;
+  }
+  getApiKey() {
+    return localStorage.getItem("apiKey");
   }
   isLoggedIn() {
     return !!this.getToken();
@@ -40602,6 +40610,22 @@ var _AuthService = class _AuthService {
   logout() {
     localStorage.removeItem("accessToken");
     this.router.navigate([""]);
+  }
+  addFavoriteCity(city) {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error("No token found");
+    }
+    const headers = { "Authorization": `Bearer ${token}` };
+    return this.http.post(`${environment.apiBaseUrl}/api/user/addfavorite?c=${city}`, null, { headers });
+  }
+  getFavoriteCities() {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error("No token found");
+    }
+    const headers = { "Authorization": `Bearer ${token}` };
+    return this.http.get(`${environment.apiBaseUrl}/api/user/favorites`, { headers });
   }
 };
 _AuthService.\u0275fac = function AuthService_Factory(t) {
@@ -40634,16 +40658,18 @@ var _SigninComponent = class _SigninComponent {
   }
   signIn() {
     this.authService.signIn(this.email, this.password).subscribe({
-      next: (token) => {
-        if (token) {
-          this.authService.saveToken(token);
+      next: (response) => {
+        if (response) {
+          this.authService.saveTokenAndApiKey(response);
+          console.log("Token saved: ", this.authService.getToken());
+          console.log("API Key saved: ", this.authService.getApiKey());
           this.router.navigate([""]);
           console.log("token saved");
         }
       },
       error: (error) => {
         console.log("error getting token", error);
-        this.errorMessage = error.error || "Failed to sign in";
+        this.errorMessage = error.error.error || "Failed to sign in";
       }
     });
   }
@@ -40691,10 +40717,345 @@ _SigninComponent.\u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type:
     \u0275\u0275advance(3);
     \u0275\u0275property("ngIf", ctx.errorMessage);
   }
-}, dependencies: [NgIf, \u0275NgNoValidate, DefaultValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, NgModel, NgForm] });
+}, dependencies: [NgIf, \u0275NgNoValidate, DefaultValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, NgModel, NgForm], styles: ["\n\n.signin-form[_ngcontent-%COMP%] {\n  font-family: Arial, sans-serif;\n  max-width: 600px;\n  margin: 0 auto;\n  padding: 20px;\n  background-color: #f9f9f9;\n  border-radius: 5px;\n  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);\n}\n.signin-form[_ngcontent-%COMP%]   div[_ngcontent-%COMP%] {\n  margin-bottom: 20px;\n}\n.signin-form[_ngcontent-%COMP%]   label[_ngcontent-%COMP%] {\n  display: block;\n  margin-bottom: 5px;\n}\n.signin-form[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  width: 100%;\n  padding: 10px;\n  border-radius: 5px;\n  border: 1px solid #ccc;\n}\n.signin-form[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  padding: 10px 20px;\n  border: none;\n  border-radius: 5px;\n  background-color: #007BFF;\n  color: white;\n  cursor: pointer;\n  transition: background-color 0.3s ease;\n}\n.signin-form[_ngcontent-%COMP%]   button[_ngcontent-%COMP%]:hover {\n  background-color: #0056b3;\n}\n.error-message[_ngcontent-%COMP%] {\n  color: red;\n  margin-top: 10px;\n}\n/*# sourceMappingURL=signin.component.css.map */"] });
 var SigninComponent = _SigninComponent;
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(SigninComponent, { className: "SigninComponent" });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(SigninComponent, { className: "SigninComponent", filePath: "src/app/signin/signin.component.ts", lineNumber: 10 });
+})();
+
+// src/app/weather/weather.component.ts
+function WeatherComponent_p_9_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p");
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1("City: ", ctx_r2.currentWeather.city, "");
+  }
+}
+function WeatherComponent_div_10_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r4 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div")(1, "button", 10);
+    \u0275\u0275listener("click", function WeatherComponent_div_10_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r4);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.addCityToFavorites());
+    });
+    \u0275\u0275text(2, "Add to Favorites");
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275property("disabled", !ctx_r2.currentWeather);
+  }
+}
+function WeatherComponent_p_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p");
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1("Description: ", ctx_r2.currentWeather.description, "");
+  }
+}
+function WeatherComponent_img_12_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "img", 11);
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275property("src", ctx_r2.currentWeather.iconUrl, \u0275\u0275sanitizeUrl);
+  }
+}
+function WeatherComponent_div_13_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 12)(1, "h2");
+    \u0275\u0275text(2, "Forecast Weather");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "p");
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "p");
+    \u0275\u0275text(6);
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(7, "img", 11);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1("City: ", ctx_r2.forecastWeather.city, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("Description: ", ctx_r2.forecastWeather.description, "");
+    \u0275\u0275advance();
+    \u0275\u0275property("src", ctx_r2.forecastWeather.iconUrl, \u0275\u0275sanitizeUrl);
+  }
+}
+function WeatherComponent_div_14_button_9_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r7 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 5);
+    \u0275\u0275listener("click", function WeatherComponent_div_14_button_9_Template_button_click_0_listener() {
+      const city_r8 = \u0275\u0275restoreView(_r7).$implicit;
+      const ctx_r2 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r2.updateWeatherFromFavorites(city_r8));
+    });
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const city_r8 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(city_r8);
+  }
+}
+function WeatherComponent_div_14_div_10_div_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div")(1, "p");
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "p");
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "p");
+    \u0275\u0275text(6);
+    \u0275\u0275pipe(7, "date");
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(8, "img", 11);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const weather_r9 = ctx.$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("City: ", weather_r9.city, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("Description: ", weather_r9.description, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("Time: ", \u0275\u0275pipeBind3(7, 4, ctx_r2.convertUnixTime(weather_r9.time), "shortTime", "CET"), "");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("src", "https://openweathermap.org/img/wn/" + weather_r9.icon + "@2x.png", \u0275\u0275sanitizeUrl);
+  }
+}
+function WeatherComponent_div_14_div_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 17)(1, "h2");
+    \u0275\u0275text(2, "Historical Weather");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "p", 18);
+    \u0275\u0275text(4);
+    \u0275\u0275pipe(5, "date");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(6, WeatherComponent_div_14_div_10_div_6_Template, 9, 8, "div", 19);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1("Date: ", \u0275\u0275pipeBind2(5, 2, ctx_r2.selectedDate, "fullDate"), "");
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngForOf", ctx_r2.historicalWeather.data);
+  }
+}
+function WeatherComponent_div_14_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r5 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div")(1, "div", 3);
+    \u0275\u0275element(2, "input", 13, 1);
+    \u0275\u0275elementStart(4, "button", 5);
+    \u0275\u0275listener("click", function WeatherComponent_div_14_Template_button_click_4_listener() {
+      \u0275\u0275restoreView(_r5);
+      const dateInput_r6 = \u0275\u0275reference(3);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.updateWeatherUserInput(ctx_r2.selectedCity, dateInput_r6.value));
+    });
+    \u0275\u0275text(5, "Update Weather for Specific Date");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "div", 14)(7, "h2");
+    \u0275\u0275text(8, "Favorite Cities");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(9, WeatherComponent_div_14_button_9_Template, 2, 1, "button", 15);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(10, WeatherComponent_div_14_div_10_Template, 7, 5, "div", 16);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(9);
+    \u0275\u0275property("ngForOf", ctx_r2.favoriteCities);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.historicalWeather);
+  }
+}
+var _WeatherComponent = class _WeatherComponent {
+  constructor(cdr, http, authService) {
+    this.cdr = cdr;
+    this.http = http;
+    this.authService = authService;
+    this.favoriteCities = [];
+    this.defaultCity = "Liberec";
+    this.defaultDate = this.getYesterdaysDate();
+    this.selectedDate = this.defaultDate;
+    this.selectedCity = this.defaultCity;
+    this.currentWeatherLoaded = new EventEmitter();
+  }
+  // Inject AuthService
+  ngOnInit() {
+    this.getCurrentWeather(this.defaultCity);
+    this.getForecastWeather(this.defaultCity);
+    if (this.authService.isSubscribed()) {
+      this.getHistoricalWeather(this.defaultCity, this.convertDateFormat(this.defaultDate));
+      this.getFavoriteCities();
+    }
+  }
+  getCurrentWeather(city) {
+    this.http.get(`${environment.apiBaseUrl}/api/weather/current?c=${city}&k=${environment.apiKey}`).subscribe((data) => {
+      this.currentWeather = data;
+      this.currentWeather.iconUrl = `https://openweathermap.org/img/wn/${this.currentWeather.icon}@2x.png`;
+      this.currentWeatherLoaded.emit(true);
+    });
+  }
+  getHistoricalWeather(city, date) {
+    if (!this.authService.isSubscribed())
+      return;
+    console.log(`Requesting historical weather data for date: ${date}`);
+    this.http.get(`${environment.apiBaseUrl}/api/weather/historical?c=${city}&d=${date}&k=${environment.apiKey}`).subscribe((data) => {
+      this.historicalWeather = data;
+    });
+  }
+  getForecastWeather(city) {
+    this.http.get(`${environment.apiBaseUrl}/api/weather/forecast?c=${city}&k=${environment.apiKey}`).subscribe((data) => {
+      this.forecastWeather = data;
+      this.forecastWeather.iconUrl = `https://openweathermap.org/img/wn/${this.forecastWeather.icon}@2x.png`;
+    });
+  }
+  getFavoriteCities() {
+    this.authService.getFavoriteCities().subscribe((cities) => {
+      this.favoriteCities = cities;
+      this.cdr.detectChanges();
+    }, (error) => {
+      console.error("Error fetching favorite cities:", error);
+    });
+  }
+  /*
+  addCityToFavorites(): void {
+    if (!this.currentWeather) {
+      console.error('No current weather data available');
+      return;
+    }
+  
+    this.authService.addFavoriteCity(this.currentWeather.city).subscribe(response => {
+      console.log('City added to favorites:', response);
+      this.getFavoriteCities(); // Refresh the list of favorite cities
+    }, error => {
+      console.error('Error adding city to favorites:', error);
+    });
+  }
+  */
+  addCityToFavorites() {
+    return __async(this, null, function* () {
+      if (!this.currentWeather) {
+        console.error("No current weather data available");
+        return;
+      }
+      try {
+        const response = yield this.authService.addFavoriteCity(this.currentWeather.city).toPromise();
+        console.log("City added to favorites:", response);
+        this.getFavoriteCities();
+        location.reload();
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error("Error adding city to favorites:", error);
+      }
+    });
+  }
+  updateWeatherUserInput(city = this.selectedCity, date) {
+    this.selectedCity = city;
+    this.selectedDate = date;
+    this.getCurrentWeather(city);
+    this.getForecastWeather(city);
+    if (this.authService.isSubscribed()) {
+      this.getHistoricalWeather(city, this.convertDateFormat(date));
+    }
+  }
+  convertUnixTime(unixTime) {
+    return new Date(unixTime * 1e3);
+  }
+  getYesterdaysDate() {
+    const date = /* @__PURE__ */ new Date();
+    date.setDate(date.getDate() - 1);
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    return `${year}-${month < 10 ? "0" + month : month}-${day < 10 ? "0" + day : day}`;
+  }
+  convertDateFormat(date) {
+    const [year, month, day] = date.split("-");
+    return `${day}-${month}-${year}`;
+  }
+  getDateObject(dateString) {
+    console.log("Date string:", dateString);
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+  }
+  isUserSubscribed() {
+    return this.authService.isSubscribed();
+  }
+  updateWeatherFromFavorites(city) {
+    this.selectedCity = city;
+    this.updateWeatherUserInput(city, this.defaultDate);
+  }
+};
+_WeatherComponent.\u0275fac = function WeatherComponent_Factory(t) {
+  return new (t || _WeatherComponent)(\u0275\u0275directiveInject(ChangeDetectorRef), \u0275\u0275directiveInject(HttpClient), \u0275\u0275directiveInject(AuthService));
+};
+_WeatherComponent.\u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _WeatherComponent, selectors: [["app-weather"]], outputs: { currentWeatherLoaded: "currentWeatherLoaded" }, decls: 15, vars: 6, consts: [["cityInput", ""], ["dateInput", ""], [1, "weather-container"], [1, "input-container"], ["type", "text", "placeholder", "Enter name of city, ZIP CODE, Country Code"], [3, "click"], [1, "current-weather"], [4, "ngIf"], ["alt", "Weather icon", 3, "src", 4, "ngIf"], ["class", "forecast-weather", 4, "ngIf"], [3, "click", "disabled"], ["alt", "Weather icon", 3, "src"], [1, "forecast-weather"], ["type", "date"], [1, "favorite-cities"], [3, "click", 4, "ngFor", "ngForOf"], ["class", "historical-weather", 4, "ngIf"], [1, "historical-weather"], [1, "date"], [4, "ngFor", "ngForOf"]], template: function WeatherComponent_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r1 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 2)(1, "div", 3);
+    \u0275\u0275element(2, "input", 4, 0);
+    \u0275\u0275elementStart(4, "button", 5);
+    \u0275\u0275listener("click", function WeatherComponent_Template_button_click_4_listener() {
+      \u0275\u0275restoreView(_r1);
+      const cityInput_r2 = \u0275\u0275reference(3);
+      return \u0275\u0275resetView(ctx.updateWeatherUserInput(cityInput_r2.value, ctx.defaultDate));
+    });
+    \u0275\u0275text(5, "Update Weather");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "div", 6)(7, "h2");
+    \u0275\u0275text(8, "Current Weather");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(9, WeatherComponent_p_9_Template, 2, 1, "p", 7)(10, WeatherComponent_div_10_Template, 3, 1, "div", 7)(11, WeatherComponent_p_11_Template, 2, 1, "p", 7)(12, WeatherComponent_img_12_Template, 1, 1, "img", 8);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(13, WeatherComponent_div_13_Template, 8, 3, "div", 9)(14, WeatherComponent_div_14_Template, 11, 2, "div", 7);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    \u0275\u0275advance(9);
+    \u0275\u0275property("ngIf", ctx.currentWeather);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx.isUserSubscribed());
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx.currentWeather);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx.currentWeather);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx.forecastWeather);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx.isUserSubscribed());
+  }
+}, dependencies: [NgForOf, NgIf, DatePipe], styles: ["\n\n.weather-container[_ngcontent-%COMP%] {\n  font-family: Arial, sans-serif;\n  max-width: 600px;\n  margin: 0 auto;\n  padding: 20px;\n  background-color: #f9f9f9;\n  border-radius: 5px;\n  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);\n}\n.input-container[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: space-between;\n  margin-bottom: 20px;\n}\n.input-container[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  flex: 1;\n  margin-right: 10px;\n  padding: 10px;\n  border-radius: 5px;\n  border: 1px solid #ccc;\n}\n.input-container[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  padding: 10px 20px;\n  border: none;\n  border-radius: 5px;\n  background-color: #007BFF;\n  color: white;\n  cursor: pointer;\n}\n.input-container[_ngcontent-%COMP%]   button[_ngcontent-%COMP%]:disabled {\n  background-color: #ccc;\n}\n.current-weather[_ngcontent-%COMP%], .forecast-weather[_ngcontent-%COMP%], .historical-weather[_ngcontent-%COMP%] {\n  background-color: #f8f9fa;\n  padding: 20px;\n  border-radius: 10px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);\n  margin-bottom: 30px;\n  border: 1px solid #ddd;\n  transition: box-shadow 0.3s ease, transform 0.3s ease;\n}\n.current-weather[_ngcontent-%COMP%], .forecast-weather[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n}\n.current-weather[_ngcontent-%COMP%]:hover, .forecast-weather[_ngcontent-%COMP%]:hover, .historical-weather[_ngcontent-%COMP%]:hover {\n  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);\n  transform: translateY(-2px);\n}\n.favorite-cities[_ngcontent-%COMP%] {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));\n  gap: 20px;\n  margin-bottom: 30px;\n  align-items: center;\n  justify-items: center;\n}\n.favorite-cities[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  grid-column: 1 / -1;\n  text-align: center;\n  margin-bottom: 20px;\n}\n.favorite-cities[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  padding: 15px;\n  border: none;\n  border-radius: 10px;\n  background-color: #007BFF;\n  color: white;\n  cursor: pointer;\n  text-align: center;\n  transition: background-color 0.3s ease, transform 0.3s ease;\n  font-size: 1.1em;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n}\n.favorite-cities[_ngcontent-%COMP%]   button[_ngcontent-%COMP%]:hover {\n  background-color: #0056b3;\n  transform: scale(1.05);\n}\n.current-weather[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  padding: 10px 20px;\n  border: none;\n  border-radius: 5px;\n  background-color: #28a745;\n  color: white;\n  cursor: pointer;\n  transition: background-color 0.3s ease;\n}\n.current-weather[_ngcontent-%COMP%]   button[_ngcontent-%COMP%]:hover {\n  background-color: #1e7e34;\n}\n.current-weather[_ngcontent-%COMP%]   button[_ngcontent-%COMP%]:disabled {\n  background-color: #ccc;\n}\n.historical-weather[_ngcontent-%COMP%] {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));\n  gap: 20px;\n  margin-bottom: 20px;\n}\n.historical-weather[_ngcontent-%COMP%]   div[_ngcontent-%COMP%] {\n  padding: 20px;\n  border-radius: 5px;\n  background-color: #fff;\n  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);\n}\n.historical-weather[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  margin: 0 0 10px 0;\n}\n.historical-weather[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  max-width: 100%;\n  height: auto;\n}\nh2[_ngcontent-%COMP%] {\n  color: #007BFF;\n  border-bottom: 2px solid #007BFF;\n  padding-bottom: 5px;\n  margin-bottom: 20px;\n}\n.date[_ngcontent-%COMP%] {\n  font-size: 1.2em;\n  color: #28a745;\n  margin-bottom: 20px;\n  background-color: #f8f9fa;\n  padding: 10px;\n  border-radius: 5px;\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);\n  transition: box-shadow 0.3s ease, transform 0.3s ease;\n}\n.date[_ngcontent-%COMP%]:hover {\n  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);\n  transform: translateY(-2px);\n}\n@media only screen and (max-width: 600px) {\n  .input-container[_ngcontent-%COMP%] {\n    flex-direction: column;\n  }\n  .input-container[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n    margin-right: 0;\n    margin-bottom: 10px;\n  }\n  .favorite-cities[_ngcontent-%COMP%] {\n    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));\n  }\n  .historical-weather[_ngcontent-%COMP%]   div[_ngcontent-%COMP%] {\n    padding: 10px;\n  }\n}\n/*# sourceMappingURL=weather.component.css.map */"] });
+var WeatherComponent = _WeatherComponent;
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(WeatherComponent, { className: "WeatherComponent", filePath: "src/app/weather/weather.component.ts", lineNumber: 13 });
 })();
 
 // src/app/home/home.component.ts
@@ -40725,32 +41086,46 @@ function HomeComponent_div_0_p_5_Template(rf, ctx) {
     \u0275\u0275elementEnd();
   }
 }
+function HomeComponent_div_0_p_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p");
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1("This is your API key: ", ctx_r2.apiKey, "");
+  }
+}
 function HomeComponent_div_0_Template(rf, ctx) {
   if (rf & 1) {
     const _r1 = \u0275\u0275getCurrentView();
     \u0275\u0275elementStart(0, "div")(1, "h1");
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(3, HomeComponent_div_0_p_3_Template, 2, 0, "p", 0)(4, HomeComponent_div_0_button_4_Template, 2, 0, "button", 1)(5, HomeComponent_div_0_p_5_Template, 2, 0, "p", 0);
-    \u0275\u0275elementStart(6, "button", 2);
-    \u0275\u0275listener("click", function HomeComponent_div_0_Template_button_click_6_listener() {
+    \u0275\u0275template(3, HomeComponent_div_0_p_3_Template, 2, 0, "p", 0)(4, HomeComponent_div_0_button_4_Template, 2, 0, "button", 1)(5, HomeComponent_div_0_p_5_Template, 2, 0, "p", 0)(6, HomeComponent_div_0_p_6_Template, 2, 1, "p", 0);
+    \u0275\u0275elementStart(7, "button", 2);
+    \u0275\u0275listener("click", function HomeComponent_div_0_Template_button_click_7_listener() {
       \u0275\u0275restoreView(_r1);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.logout());
     });
-    \u0275\u0275text(7, "Logout");
+    \u0275\u0275text(8, "Logout");
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
     const ctx_r2 = \u0275\u0275nextContext();
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("Welcome, ", ctx_r2.userEmail, "!");
+    \u0275\u0275textInterpolate1("Welcome ", ctx_r2.userEmail, "!");
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", ctx_r2.isSubscribed);
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", !ctx_r2.isSubscribed);
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", !ctx_r2.isSubscribed);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.isSubscribed);
   }
 }
 function HomeComponent_ng_container_1_Template(rf, ctx) {
@@ -40773,6 +41148,7 @@ var _HomeComponent = class _HomeComponent {
     this.isLoggedIn = false;
     this.userEmail = null;
     this.isSubscribed = false;
+    this.apiKey = null;
   }
   ngOnInit() {
     this.updateUserStatus();
@@ -40782,6 +41158,9 @@ var _HomeComponent = class _HomeComponent {
     if (this.isLoggedIn) {
       this.userEmail = this.authService.getUserEmail();
       this.isSubscribed = this.authService.isSubscribed();
+      if (this.isSubscribed) {
+        this.apiKey = this.authService.getApiKey();
+      }
     }
   }
   pay() {
@@ -40803,19 +41182,20 @@ var _HomeComponent = class _HomeComponent {
 _HomeComponent.\u0275fac = function HomeComponent_Factory(t) {
   return new (t || _HomeComponent)(\u0275\u0275directiveInject(AuthService), \u0275\u0275directiveInject(HttpClient), \u0275\u0275directiveInject(Router));
 };
-_HomeComponent.\u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _HomeComponent, selectors: [["app-home"]], decls: 2, vars: 2, consts: [[4, "ngIf"], [3, "click", 4, "ngIf"], [3, "click"], ["routerLink", "/signin"], ["routerLink", "/signup"]], template: function HomeComponent_Template(rf, ctx) {
+_HomeComponent.\u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _HomeComponent, selectors: [["app-home"]], decls: 3, vars: 2, consts: [[4, "ngIf"], [3, "click", 4, "ngIf"], [3, "click"], ["routerLink", "/signin"], ["routerLink", "/signup"]], template: function HomeComponent_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275template(0, HomeComponent_div_0_Template, 8, 4, "div", 0)(1, HomeComponent_ng_container_1_Template, 5, 0, "ng-container", 0);
+    \u0275\u0275template(0, HomeComponent_div_0_Template, 9, 5, "div", 0)(1, HomeComponent_ng_container_1_Template, 5, 0, "ng-container", 0);
+    \u0275\u0275element(2, "app-weather");
   }
   if (rf & 2) {
     \u0275\u0275property("ngIf", ctx.isLoggedIn);
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", !ctx.isLoggedIn);
   }
-}, dependencies: [NgIf, RouterLink] });
+}, dependencies: [NgIf, RouterLink, WeatherComponent], styles: ["\n\ndiv[_ngcontent-%COMP%] {\n  font-family: Arial, sans-serif;\n  max-width: 600px;\n  margin: 0 auto;\n  padding: 20px;\n  background-color: #f9f9f9;\n  border-radius: 10px;\n  box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.1);\n}\nh1[_ngcontent-%COMP%] {\n  color: #007BFF;\n  border-bottom: 3px solid #007BFF;\n  padding-bottom: 10px;\n  margin-bottom: 30px;\n  text-align: center;\n}\np[_ngcontent-%COMP%] {\n  margin-bottom: 30px;\n  line-height: 1.6;\n}\nbutton[_ngcontent-%COMP%] {\n  padding: 15px 30px;\n  border: none;\n  border-radius: 10px;\n  background-color: #007BFF;\n  color: white;\n  cursor: pointer;\n  transition: background-color 0.3s ease, transform 0.3s ease;\n  margin-bottom: 20px;\n}\nbutton[_ngcontent-%COMP%]:hover {\n  background-color: #0056b3;\n  transform: scale(1.05);\n}\nbutton[_ngcontent-%COMP%]:disabled {\n  background-color: #ccc;\n  cursor: not-allowed;\n}\nng-container[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n/*# sourceMappingURL=home.component.css.map */"] });
 var HomeComponent = _HomeComponent;
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(HomeComponent, { className: "HomeComponent" });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(HomeComponent, { className: "HomeComponent", filePath: "src/app/home/home.component.ts", lineNumber: 11 });
 })();
 
 // src/app/subscribe-success/subscribe-success.component.ts
@@ -40836,10 +41216,10 @@ _SubscribeSuccessComponent.\u0275cmp = /* @__PURE__ */ \u0275\u0275defineCompone
     \u0275\u0275text(5, "Log in");
     \u0275\u0275elementEnd();
   }
-}, dependencies: [RouterLink] });
+}, dependencies: [RouterLink], styles: ["\n\nh1[_ngcontent-%COMP%] {\n  color: #007BFF;\n  border-bottom: 2px solid #007BFF;\n  padding-bottom: 5px;\n  margin-bottom: 20px;\n}\np[_ngcontent-%COMP%] {\n  margin-bottom: 20px;\n}\nbutton[_ngcontent-%COMP%] {\n  padding: 10px 20px;\n  border: none;\n  border-radius: 5px;\n  background-color: #007BFF;\n  color: white;\n  cursor: pointer;\n  transition: background-color 0.3s ease;\n}\nbutton[_ngcontent-%COMP%]:hover {\n  background-color: #0056b3;\n}\n/*# sourceMappingURL=subscribe-success.component.css.map */"] });
 var SubscribeSuccessComponent = _SubscribeSuccessComponent;
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(SubscribeSuccessComponent, { className: "SubscribeSuccessComponent" });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(SubscribeSuccessComponent, { className: "SubscribeSuccessComponent", filePath: "src/app/subscribe-success/subscribe-success.component.ts", lineNumber: 8 });
 })();
 
 // src/app/app-routing.module.ts
@@ -40875,7 +41255,7 @@ _AppComponent.\u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _A
 }, dependencies: [RouterOutlet] });
 var AppComponent = _AppComponent;
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AppComponent, { className: "AppComponent" });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AppComponent, { className: "AppComponent", filePath: "src/app/app.component.ts", lineNumber: 8 });
 })();
 
 // node_modules/@angular/cdk/fesm2022/bidi.mjs

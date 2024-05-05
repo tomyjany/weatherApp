@@ -146,13 +146,15 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<String> addFavoriteCity(String email,String city) {
         User user = userDao.findByEmail(email);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+            //return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+            return WeatherUtility.getResponse("User not found", HttpStatus.BAD_REQUEST);
         }
 
         List<FavoriteCity> favoriteCities = user.getFavoriteCities();
         for (FavoriteCity favoriteCity : favoriteCities) {
             if (favoriteCity.getCityName().equals(city)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("City is already in the list of favorite cities");
+                //return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("City is already in the list of favorite cities");
+                return WeatherUtility.getResponse("City is already in the list of favorite cities", HttpStatus.BAD_REQUEST);
             }
         }
 
@@ -161,7 +163,8 @@ public class UserServiceImpl implements UserService {
         newFavoriteCity.setUser(user);
         favoriteCityDao.save(newFavoriteCity);
 
-        return ResponseEntity.ok("City added to favorite cities");
+        //return ResponseEntity.ok("City added to favorite cities");
+        return WeatherUtility.getResponse("City added to favorite cities", HttpStatus.OK);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.inn.weatherApp.serviceImpl;
 
 import Objects.CityInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inn.weatherApp.service.WeatherService;
@@ -195,11 +196,18 @@ public class WeatherServiceImpl implements WeatherService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response);
 
-        String correctedCityName = root.get(0).get("name").asText();
-        double latitude = root.get(0).get("lat").asDouble();
-        double longitude = root.get(0).get("lon").asDouble();
+        if (root.size() > 0) {
+            JsonNode cityNode = root.get(0);
+            if (cityNode != null) {
+                String correctedCityName = cityNode.get("name").asText();
+                double latitude = cityNode.get("lat").asDouble();
+                double longitude = cityNode.get("lon").asDouble();
 
-        return new CityInfo(correctedCityName, longitude, latitude);
+                return new CityInfo(correctedCityName, longitude, latitude);
+            }
+        }
+
+        throw new JsonMappingException(null, "No city data available");
     }
     private Map<String, Object> parseHistoricalWeatherResponse(String response) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
@@ -231,7 +239,7 @@ public class WeatherServiceImpl implements WeatherService {
 
         return weatherData;
     }
-    private Map<String, Object> parseCurrentWeatherResponse(String response,String city, double lon, double lat) throws JsonProcessingException {
+    private Map<String, Object> parseCurrentWeatherResponse(String response,String city, double lat, double lon) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response);
 

@@ -17,7 +17,6 @@ export class AuthService {
   }
 
   saveTokenAndApiKey(response: { token: string, apiKey: string | null }): void {
-    console.log('Response: ', response);
     localStorage.setItem('accessToken', response.token);
     if (response.apiKey) {
       localStorage.setItem('apiKey', response.apiKey);
@@ -27,7 +26,6 @@ export class AuthService {
 
   getToken(): string | null {
     const token = localStorage.getItem('accessToken');
-    console.log('Saved token: ', token);
     return token;
   }
 

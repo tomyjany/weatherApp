@@ -27,7 +27,7 @@ export class SigninComponent {
       },
       error: error => {
         console.log('error getting token', error);
-        this.errorMessage = error.error || 'Failed to sign in';
+        this.errorMessage = error.error.error || 'Failed to sign in';
       }
     });
   }

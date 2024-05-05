@@ -4,41 +4,46 @@ div {
     margin: 0 auto;
     padding: 20px;
     background-color: #f9f9f9;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    border-radius: 10px; /* Increased border radius */
+    box-shadow: 0px 5px 15px 0px rgba(0,0,0,0.1); /* Increased box shadow for a more 3D effect */
 }
 
 h1 {
     color: #007BFF;
-    border-bottom: 2px solid #007BFF;
-    padding-bottom: 5px;
-    margin-bottom: 20px;
+    border-bottom: 3px solid #007BFF; /* Increased border thickness */
+    padding-bottom: 10px; /* Increased padding */
+    margin-bottom: 30px; /* Increased margin */
+    text-align: center; /* Centered the text */
 }
 
 p {
-    margin-bottom: 20px;
+    margin-bottom: 30px; /* Increased margin */
+    line-height: 1.6; /* Increased line height for better readability */
 }
 
 button {
-    padding: 10px 20px;
+    padding: 15px 30px; /* Increased padding */
     border: none;
-    border-radius: 5px;
+    border-radius: 10px; /* Increased border radius */
     background-color: #007BFF;
     color: white;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-bottom: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Added transform to the transition */
+    margin-bottom: 20px; /* Increased margin */
 }
 
 button:hover {
     background-color: #0056b3;
+    transform: scale(1.05); /* Button will slightly increase in size when hovered */
 }
 
 button:disabled {
     background-color: #ccc;
+    cursor: not-allowed; /* Change cursor when button is disabled */
 }
 
 ng-container {
     display: flex;
     justify-content: space-between;
+    align-items: center; /* Vertically center the items */
 }
