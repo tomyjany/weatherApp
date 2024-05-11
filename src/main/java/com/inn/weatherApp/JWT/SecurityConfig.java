@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -58,6 +60,8 @@ public class SecurityConfig {
                         .requestMatchers("/*.js", "/*.css", "/*.ico", "/index.html").permitAll()  // Static resources
                         .requestMatchers("/api/subscriber-only/**").hasAuthority("ROLE_SUBSCRIBED")
                         .requestMatchers("/api/user/pay").hasAuthority("ROLE_UNSUBSCRIBED")
+                        .requestMatchers("/api/user/favorites").hasAuthority("ROLE_SUBSCRIBED")
+                        .requestMatchers("/api/user/addfavorite").hasAuthority("ROLE_SUBSCRIBED")
                         .requestMatchers("/**").permitAll())  // Allow all other requests
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -75,5 +79,9 @@ public class SecurityConfig {
         auth
                 .userDetailsService(customerDetailsService)
                 .passwordEncoder(passwordEncoder);
+    }
+    @Bean
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
     }
 }

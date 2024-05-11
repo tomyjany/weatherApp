@@ -2,7 +2,9 @@ package com.inn.weatherApp.serviceImpl;
 
 import com.inn.weatherApp.JWT.CustomerDetailsService;
 import com.inn.weatherApp.JWT.JWTUtil;
+import com.inn.weatherApp.POJO.FavoriteCity;
 import com.inn.weatherApp.POJO.User;
+import com.inn.weatherApp.dao.FavoriteCityDao;
 import com.inn.weatherApp.dao.UserDao;
 import com.inn.weatherApp.service.UserService;
 import com.inn.weatherApp.utils.WeatherUtility;
@@ -16,14 +18,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
     @Autowired
     UserDao userDao;
+    @Autowired
+    FavoriteCityDao favoriteCityDao;
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
@@ -77,26 +80,29 @@ public class UserServiceImpl implements UserService {
 
     }
     @Override
-    public ResponseEntity<String> signIn(Map<String,String> requestMap) {
+    public ResponseEntity<Map<String,String>> signIn(Map<String,String> requestMap) {
         try {
             UserDetails userDetails = customerDetailsService.loadUserByUsername(requestMap.get("email"));
             if (passwordEncoder.matches(requestMap.get("user_password"), userDetails.getPassword())) {
                 String role = userDetails.getAuthorities().iterator().next().getAuthority();
                 String token = jwtUtil.generateToken(userDetails.getUsername(),role);
-                return ResponseEntity.ok(token);  // Return the token in the response body
+                User user = userDao.findByEmail(requestMap.get("email"));
+                String apiKey = user.getApi_key();
+                Map<String,String> response = new HashMap<>();
+                response.put("token",token);
+                response.put("apiKey",apiKey);
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid credentials"));
             }
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not found"));
         } catch (DataAccessException e) {
-            // This catches exceptions like database not reachable
             log.error("Database access issue: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Service unavailable");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Service unavailable"));
         } catch (Exception e) {
-            // Catching unexpected exceptions
             log.error("Unexpected error occurred: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "An unexpected error occurred"));
         }
     }
 
@@ -107,6 +113,8 @@ public class UserServiceImpl implements UserService {
             User user = userDao.findByEmail(email);
             if (user != null) {
                 user.setSubscription(true);
+                String apiKey = UUID.randomUUID().toString();
+                user.setApi_key(apiKey);
                 userDao.save(user);
                 return WeatherUtility.getResponse("Payment successful, subscription activated", HttpStatus.OK);
             } else {
@@ -117,6 +125,62 @@ public class UserServiceImpl implements UserService {
         }
         return WeatherUtility.getResponse("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @Override
+    public boolean validateApiKey(String apiKey) {
+        User user = userDao.findByApiKey(apiKey);
+        return user != null;
+    }
+
+    @Override
+    public Integer findUserByEmailAddress(String email) {
+        User user = userDao.findByEmail(email);
+        if (user != null) {
+            return user.getId();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> addFavoriteCity(String email,String city) {
+        User user = userDao.findByEmail(email);
+        if (user == null) {
+            //return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+            return WeatherUtility.getResponse("User not found", HttpStatus.BAD_REQUEST);
+        }
+
+        List<FavoriteCity> favoriteCities = user.getFavoriteCities();
+        for (FavoriteCity favoriteCity : favoriteCities) {
+            if (favoriteCity.getCityName().equals(city)) {
+                //return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("City is already in the list of favorite cities");
+                return WeatherUtility.getResponse("City is already in the list of favorite cities", HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        FavoriteCity newFavoriteCity = new FavoriteCity();
+        newFavoriteCity.setCityName(city);
+        newFavoriteCity.setUser(user);
+        favoriteCityDao.save(newFavoriteCity);
+
+        //return ResponseEntity.ok("City added to favorite cities");
+        return WeatherUtility.getResponse("City added to favorite cities", HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getFavoriteCities(String email) {
+        User user = userDao.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        List<FavoriteCity> favoriteCities = user.getFavoriteCities();
+        List<String> cityNames = new ArrayList<>();
+        for (FavoriteCity favoriteCity : favoriteCities) {
+            cityNames.add(favoriteCity.getCityName());
+        }
+
+        return ResponseEntity.ok(cityNames);    }
 
 
 }

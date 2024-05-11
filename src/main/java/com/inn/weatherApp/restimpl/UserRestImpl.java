@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 @RestController
 @Slf4j
@@ -61,9 +64,9 @@ public class UserRestImpl implements UserRest {
     }
 
     @Override
-    public ResponseEntity<String> signIn(Map<String, String> requestMap) {
+    public ResponseEntity<Map<String,String>> signIn(Map<String, String> requestMap) {
         if (!requestMap.containsKey("email") || !requestMap.containsKey("user_password")) {
-            return WeatherUtility.getResponse("Email and password are required", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Email and password are required"));
         }
         return userService.signIn(requestMap);
     }
@@ -76,6 +79,27 @@ public class UserRestImpl implements UserRest {
     @Override
     public ResponseEntity<String> pay(@RequestBody String token) {
         return userService.pay(token);
+    }
+
+    @Override
+    public ResponseEntity<String> addFavoriteCity(String city) {
+        String email = getEmailFromSecurityContext();
+        return userService.addFavoriteCity(email, city);
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getFavoriteCities() {
+        String email = getEmailFromSecurityContext();
+        return userService.getFavoriteCities(email);
+    }
+
+    private String getEmailFromSecurityContext() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails)principal).getUsername();
+        } else {
+            return principal.toString();
+        }
     }
 
 
