@@ -9,6 +9,7 @@ on:
   pull_request:
     branches: [ "development" ]
 
+
 permissions:
   contents: write
   security-events: write
