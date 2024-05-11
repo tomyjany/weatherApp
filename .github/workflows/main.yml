@@ -47,14 +47,6 @@ jobs:
           fi
           
           
-      
-
-      - name: Build and test with Maven
-        run: mvn clean install -Pprod  # Specify the Maven profile here
-
-      - name: Generate JaCoCo coverage report
-        run: mvn clean test jacoco:report
-
       - name: Setup Node js For angular
         uses: actions/setup-node@v3
         with:
@@ -67,6 +59,33 @@ jobs:
       - name : run Angular tests in jest
         run: npm run test:coverage
         working-directory: ./frontend
+
+      - name : Install Angular Cli
+        run : npm install -g @angular/cli@17.3.5
+        working-directory: ./frontend
+
+      - name: Build Angular Project
+        run: ng build --base-href "/"
+        working-directory: ./frontend
+
+      - name: Copy angular build artifacts
+        run: |
+          mkdir -p ./src/main/resources/static
+          cp -R ./frontend/dist/frontend/browser/* ./src/main/resources/static/
+        shell : bash
+
+      - name: List files in the static directory
+        run: ls -lah ./src/main/resources/static/
+        shell: bash
+
+
+
+      - name: Build and test with Maven
+        run: mvn clean install -Pprod  # Specify the Maven profile here
+
+      - name: Generate JaCoCo coverage report
+        run: mvn clean test jacoco:report
+
 
 
 
