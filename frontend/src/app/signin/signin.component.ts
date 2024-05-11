@@ -16,16 +16,18 @@ export class SigninComponent {
 
   signIn(){
     this.authService.signIn(this.email, this.password).subscribe({
-      next: token => {
-        if (token){
-          this.authService.saveToken(token);
+      next: response => {
+        if (response){
+          this.authService.saveTokenAndApiKey(response);
+          console.log('Token saved: ', this.authService.getToken());
+          console.log('API Key saved: ', this.authService.getApiKey());
           this.router.navigate(['']);
           console.log('token saved');
         }
       },
       error: error => {
         console.log('error getting token', error);
-        this.errorMessage = error.error || 'Failed to sign in';
+        this.errorMessage = error.error.error || 'Failed to sign in';
       }
     });
   }

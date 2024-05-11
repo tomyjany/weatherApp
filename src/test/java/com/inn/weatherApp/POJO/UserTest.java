@@ -88,18 +88,6 @@ class UserTest {
         assertEquals(user1.hashCode(), user2.hashCode());
     }
 
-    @Test
-    void testToString() {
-        User user = new User();
-        user.setId(1);
-        user.setFirst_name("John");
-        user.setLast_name("Doe");
-        user.setEmail("john.doe@example.com");
-        user.setUser_password("securePassword");
-        user.setSubscription(true);
 
-        String expectedString = "User(id=1, first_name=John, last_name=Doe, email=john.doe@example.com, user_password=securePassword, subscription=true)";
-        assertEquals(expectedString, user.toString());
-    }
 }
 

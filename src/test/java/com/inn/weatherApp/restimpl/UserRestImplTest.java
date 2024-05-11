@@ -11,11 +11,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +41,7 @@ public class UserRestImplTest {
         requestMap.put("email", "test@example.com");
         validateSignUpMapMethod = UserRestImpl.class.getDeclaredMethod("validateSignUpMap", Map.class);
         validateSignUpMapMethod.setAccessible(true);
+
     }
 
     @Test
@@ -66,37 +70,6 @@ public class UserRestImplTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         Map<String, Object> responseMap = objectMapper.readValue(response.getBody(), Map.class);
         assertEquals("something went wrong", responseMap.get("message"));
-    }
-    @Test
-    public void signIn_MissingCredentials_ReturnsBadRequest() {
-        // Arrange
-        requestMap.remove("user_password");
-
-        // Act
-        ResponseEntity<String> response = userRest.signIn(requestMap);
-
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().contains("Email and password are required"));
-    }
-
-    @Test
-    public void signIn_ValidCredentials_ReturnsSuccessResponse() {
-        // Arrange
-        Map<String, String> validCredentials = new HashMap<>();
-        validCredentials.put("email", "test@example.com");
-        validCredentials.put("user_password", "password123");
-
-        ResponseEntity<String> expectedResponse = ResponseEntity.ok("Login successful");
-        when(userService.signIn(validCredentials)).thenReturn(expectedResponse);
-
-        // Act
-        ResponseEntity<String> response = userRest.signIn(validCredentials);
-
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Login successful", response.getBody());
-        verify(userService).signIn(validCredentials);
     }
 
     @Test
@@ -185,5 +158,128 @@ public class UserRestImplTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertTrue(response.getBody().contains("Wrong Credentials"));
     }
+
+    @Test
+    public void signIn_MissingCredentials_ReturnsBadRequest() {
+        // Arrange
+        Map<String, String> requestMap = new HashMap<>();
+        requestMap.put("email", "test@example.com");
+        // user_password key is missing
+
+        // Act
+        ResponseEntity<Map<String, String>> response = userRest.signIn(requestMap);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Email and password are required", response.getBody().get("error"));
+    }
+    @Test
+    public void signIn_ValidCredentials_ReturnsSuccessResponse() {
+        // Arrange
+        Map<String, String> validCredentials = new HashMap<>();
+        validCredentials.put("email", "test@example.com");
+        validCredentials.put("user_password", "password123");
+
+        Map<String, String> expectedResponse = new HashMap<>();
+        expectedResponse.put("message", "Login successful");
+
+        when(userService.signIn(validCredentials)).thenReturn(ResponseEntity.ok(expectedResponse));
+
+        // Act
+        ResponseEntity<Map<String, String>> response = userRest.signIn(validCredentials);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+        verify(userService).signIn(validCredentials);
+    }
+
+    @Test
+    public void signIn_InvalidCredentials_ReturnsUnauthorizedResponse() {
+        // Arrange
+        Map<String, String> invalidCredentials = new HashMap<>();
+        invalidCredentials.put("email", "test@example.com");
+        invalidCredentials.put("user_password", "wrongpassword");
+
+        Map<String, String> expectedResponse = new HashMap<>();
+        expectedResponse.put("error", "Invalid credentials");
+
+        when(userService.signIn(invalidCredentials)).thenReturn(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(expectedResponse));
+
+        // Act
+        ResponseEntity<Map<String, String>> response = userRest.signIn(invalidCredentials);
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+        verify(userService).signIn(invalidCredentials);
+    }
+
+    @Test
+    public void addFavoriteCity_ValidCity_ReturnsSuccessResponse() {
+        // Arrange
+        String city = "London";
+        String email = "test@example.com";
+        ResponseEntity<String> expectedResponse = ResponseEntity.ok("City added to favorites");
+
+        when(userService.addFavoriteCity(email, city)).thenReturn(expectedResponse);
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(new User(email, "password", new ArrayList<>()));
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Act
+        ResponseEntity<String> response = userRest.addFavoriteCity(city);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedResponse.getBody(), response.getBody());
+        verify(userService).addFavoriteCity(email, city);
+    }
+
+    @Test
+    public void getFavoriteCities_ValidEmail_ReturnsFavoriteCities() {
+        // Arrange
+        String email = "test@example.com";
+        List<String> cities = Arrays.asList("London", "Paris");
+        ResponseEntity<List<String>> expectedResponse = ResponseEntity.ok(cities);
+
+        when(userService.getFavoriteCities(email)).thenReturn(expectedResponse);
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(new User(email, "password", new ArrayList<>()));
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Act
+        ResponseEntity<List<String>> response = userRest.getFavoriteCities();
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedResponse.getBody(), response.getBody());
+        verify(userService).getFavoriteCities(email);
+    }
+    @Test
+    public void getEmailFromSecurityContext_NonUserDetailsPrincipal_ReturnsPrincipalToString() throws Exception {
+        // Arrange
+        String principalString = "testPrincipal";
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(principalString);
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Use reflection to access the private method
+        Method method = UserRestImpl.class.getDeclaredMethod("getEmailFromSecurityContext");
+        method.setAccessible(true);
+
+        // Act
+        String returnedPrincipal = (String) method.invoke(userRest);
+
+        // Assert
+        assertEquals(principalString, returnedPrincipal);
+    }
+
 }
 

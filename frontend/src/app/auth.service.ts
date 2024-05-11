@@ -11,17 +11,26 @@ import { Router } from '@angular/router';
 export class AuthService {
   constructor(private http: HttpClient,private router: Router) {}
 
-  signIn(email: string, password: string): Observable<any> {
+  signIn(email: string, password: string): Observable<{ token: string, apiKey: string | null }> {
     const body = { email: email, user_password: password };
-    return this.http.post(`${environment.apiBaseUrl}/api/user/signin`, body, { responseType: 'text' });
+    return this.http.post<{ token: string, apiKey: string | null }>(`${environment.apiBaseUrl}/api/user/signin`, body);
   }
 
-  saveToken(token: string): void {
-    localStorage.setItem('accessToken', token);
+  saveTokenAndApiKey(response: { token: string, apiKey: string | null }): void {
+    localStorage.setItem('accessToken', response.token);
+    if (response.apiKey) {
+      localStorage.setItem('apiKey', response.apiKey);
+    }
   }
+
 
   getToken(): string | null {
-    return localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
+    return token;
+  }
+
+  getApiKey(): string | null {
+    return localStorage.getItem('apiKey');
   }
 
   isLoggedIn(): boolean {
@@ -48,5 +57,24 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('accessToken');  // Clear the token from storage
     this.router.navigate(['']);       // Redirect to the sign-in page
+  }
+  addFavoriteCity(city: string): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+  
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.post(`${environment.apiBaseUrl}/api/user/addfavorite?c=${city}`, null, { headers });
+  }
+  
+  getFavoriteCities(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('No token found');
+    }
+  
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.get(`${environment.apiBaseUrl}/api/user/favorites`, { headers });
   }
 }

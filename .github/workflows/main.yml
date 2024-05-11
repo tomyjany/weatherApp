@@ -33,13 +33,20 @@ jobs:
           echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
+          echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_KEY }}" >> $GITHUB_ENV
+          echo "LOCAL_API_KEY=${{ secrets.LOCAL_API_KEY }}" >> $GITHUB_ENV
 
-      - name: Build and test with Maven
-        run: mvn clean install -Pprod  # Specify the Maven profile here
-
-      - name: Generate JaCoCo coverage report
-        run: mvn clean test jacoco:report
-
+      - name: Replace API Key in environment.prod.ts and test
+        run: |
+          sed -i "s/REPLACE_THIS_WITH_API_KEY/${{ secrets.LOCAL_API_KEY }}/g" ./frontend/src/environments/environment.prod.ts
+          if grep -q "REPLACE_THIS_WITH_API_KEY" ./frontend/src/environments/environment.prod.ts; then
+            echo "Replacement failed."
+            exit 1
+          else
+            echo "Replacement successful."
+          fi
+          
+          
       - name: Setup Node js For angular
         uses: actions/setup-node@v3
         with:
@@ -52,6 +59,33 @@ jobs:
       - name : run Angular tests in jest
         run: npm run test:coverage
         working-directory: ./frontend
+
+      - name : Install Angular Cli
+        run : npm install -g @angular/cli@17.3.5
+        working-directory: ./frontend
+
+      - name: Build Angular Project
+        run: ng build --base-href "/"
+        working-directory: ./frontend
+
+      - name: Copy angular build artifacts
+        run: |
+          mkdir -p ./src/main/resources/static
+          cp -R ./frontend/dist/frontend/browser/* ./src/main/resources/static/
+        shell : bash
+
+      - name: List files in the static directory
+        run: ls -lah ./src/main/resources/static/
+        shell: bash
+
+
+
+      - name: Build and test with Maven
+        run: mvn clean install -Pprod  # Specify the Maven profile here
+
+      - name: Generate JaCoCo coverage report
+        run: mvn clean test jacoco:report
+
 
 
 
