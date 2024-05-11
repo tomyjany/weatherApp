@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/signup/signup.component.css"],
-  "sourcesContent": [".signup-form {\n    font-family: Arial, sans-serif;\n    max-width: 600px;\n    margin: 0 auto;\n    padding: 20px;\n    background-color: #f9f9f9;\n    border-radius: 5px;\n    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);\n}\n\n.signup-form input {\n    display: block;\n    width: 100%;\n    padding: 10px;\n    border-radius: 5px;\n    border: 1px solid #ccc;\n    margin-bottom: 20px;\n}\n\n.signup-form button {\n    padding: 10px 20px;\n    border: none;\n    border-radius: 5px;\n    background-color: #007BFF;\n    color: white;\n    cursor: pointer;\n    transition: background-color 0.3s ease;\n}\n\n.signup-form button:hover {\n    background-color: #0056b3;\n}\n\n.error-message {\n    color: red;\n    margin-top: 10px;\n}"],
-  "mappings": ";AAAA,CAAC;AACG,eAAa,KAAK,EAAE;AACpB,aAAW;AACX,UAAQ,EAAE;AACV,WAAS;AACT,oBAAkB;AAClB,iBAAe;AACf,cAAY,IAAI,IAAI,KAAK,IAAI,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAC5C;AAEA,CAVC,YAUY;AACT,WAAS;AACT,SAAO;AACP,WAAS;AACT,iBAAe;AACf,UAAQ,IAAI,MAAM;AAClB,iBAAe;AACnB;AAEA,CAnBC,YAmBY;AACT,WAAS,KAAK;AACd,UAAQ;AACR,iBAAe;AACf,oBAAkB;AAClB,SAAO;AACP,UAAQ;AACR,cAAY,iBAAiB,KAAK;AACtC;AAEA,CA7BC,YA6BY,MAAM;AACf,oBAAkB;AACtB;AAEA,CAAC;AACG,SAAO;AACP,cAAY;AAChB;",
-  "names": []
-}

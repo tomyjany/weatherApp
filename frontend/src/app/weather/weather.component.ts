@@ -4,6 +4,9 @@ import { environment } from '../../environments/environment';
 import { AuthService } from '../auth.service';
 import { EventEmitter, Output } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
+import { tap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-weather',
@@ -40,7 +43,7 @@ export class WeatherComponent {
       this.currentWeatherLoaded.emit(true); 
     });
   }
-
+/*
   getHistoricalWeather(city: string, date: string): void {
     if (!this.authService.isSubscribed()) return; // Check if the user is subscribed
 
@@ -50,6 +53,21 @@ export class WeatherComponent {
     });
   }
 
+  */
+  getHistoricalWeather(city: string, date: string): Observable<any> {
+
+    if (!this.authService.isSubscribed()) {
+      return of(null); // Return an Observable of null if the user is not subscribed
+    }
+
+  
+    console.log(`Requesting historical weather data for date: ${date}`);
+    return this.http.get(`${environment.apiBaseUrl}/api/weather/historical?c=${city}&d=${date}&k=${environment.apiKey}`).pipe(
+      tap(data => {
+        this.historicalWeather = data;
+      })
+    );
+  }
   getForecastWeather(city: string): void {
     this.http.get(`${environment.apiBaseUrl}/api/weather/forecast?c=${city}&k=${environment.apiKey}`).subscribe(data => {
       this.forecastWeather = data;
@@ -104,7 +122,16 @@ export class WeatherComponent {
     this.getCurrentWeather(city);
     this.getForecastWeather(city);
     if (this.authService.isSubscribed()) {
-      this.getHistoricalWeather(city, this.convertDateFormat(date));
+      //this.getHistoricalWeather(city, this.convertDateFormat(date));
+      this.getHistoricalWeather(city, this.convertDateFormat(date)).subscribe(
+        () => {
+          this.selectedDate = date;
+        },
+        (error: any) => { // Explicitly specify the type of 'error' as 'any'
+          console.error('Error fetching historical weather:', error);
+          this.selectedDate = this.defaultDate;
+        }
+      );
     }
   }
 

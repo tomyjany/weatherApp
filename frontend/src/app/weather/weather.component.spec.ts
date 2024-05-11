@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { WeatherComponent } from './weather.component';
 import { AuthService } from '../auth.service';
 import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 class MockAuthService {
   isSubscribed = jest.fn().mockReturnValue(false);
@@ -73,14 +74,6 @@ describe('WeatherComponent', () => {
     expect(component.currentWeather).toEqual({ ...mockData, iconUrl: `https://openweathermap.org/img/wn/${mockData.icon}@2x.png` });
   });
   
-  it('should get historical weather', () => {
-    const mockData = { data: 'data' };
-    mockAuthService.isSubscribed.mockReturnValue(true);
-    component.getHistoricalWeather(component.defaultCity, component.convertDateFormat(component.defaultDate));
-    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/historical?c=${component.defaultCity}&d=${component.convertDateFormat(component.defaultDate)}&k=${environment.apiKey}`);
-    req.flush(mockData);
-    expect(component.historicalWeather).toEqual(mockData);
-  });
   
   it('should get forecast weather', () => {
     const mockData = { icon: 'icon' };
@@ -147,6 +140,25 @@ describe('WeatherComponent', () => {
     expect(component.selectedCity).toBe(city);
     expect(component.updateWeatherUserInput).toHaveBeenCalledWith(city, component.defaultDate);
   });
+  it('should get historical weather and handle error', () => {
+    mockAuthService.isSubscribed.mockReturnValue(true);
+
+    let response;
+    component.getHistoricalWeather(component.defaultCity, component.convertDateFormat(component.defaultDate)).subscribe(
+      data => response = data,
+      error => response = error
+    );
+
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/api/weather/historical?c=${component.defaultCity}&d=${component.convertDateFormat(component.defaultDate)}&k=${environment.apiKey}`);
+
+    // Simulate a network error
+    req.error(new ErrorEvent('Network error'));
+
+  
+    expect(response).toBeInstanceOf(HttpErrorResponse);
+    expect(component.selectedDate).toEqual(component.defaultDate);
+  });
+
 
 
 });

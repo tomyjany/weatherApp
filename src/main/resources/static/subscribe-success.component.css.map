@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/subscribe-success/subscribe-success.component.css"],
-  "sourcesContent": ["h1 {\n    color: #007BFF;\n    border-bottom: 2px solid #007BFF;\n    padding-bottom: 5px;\n    margin-bottom: 20px;\n}\n\np {\n    margin-bottom: 20px;\n}\n\nbutton {\n    padding: 10px 20px;\n    border: none;\n    border-radius: 5px;\n    background-color: #007BFF;\n    color: white;\n    cursor: pointer;\n    transition: background-color 0.3s ease;\n}\n\nbutton:hover {\n    background-color: #0056b3;\n}"],
-  "mappings": ";AAAA;AACI,SAAO;AACP,iBAAe,IAAI,MAAM;AACzB,kBAAgB;AAChB,iBAAe;AACnB;AAEA;AACI,iBAAe;AACnB;AAEA;AACI,WAAS,KAAK;AACd,UAAQ;AACR,iBAAe;AACf,oBAAkB;AAClB,SAAO;AACP,UAAQ;AACR,cAAY,iBAAiB,KAAK;AACtC;AAEA,MAAM;AACF,oBAAkB;AACtB;",
-  "names": []
-}
