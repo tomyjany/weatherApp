@@ -13,6 +13,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: env
 
     steps:
 
@@ -30,10 +31,11 @@ jobs:
           echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
+          echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_KEY }}" >> $GITHUB_ENV
           
       - name: Replace API Key in environment.prod.ts and test
         run: |
-          sed -i "s/REPLACE_THIS_WITH_API_KEY/${{ secrets.OPENWEATHER_KEY }}/g" ./frontend/src/environments/environment.prod.ts
+          sed -i "s/REPLACE_THIS_WITH_API_KEY/${{ secrets.LOCAL_API_KEY }}/g" ./frontend/src/environments/environment.prod.ts
           if grep -q "REPLACE_THIS_WITH_API_KEY" ./frontend/src/environments/environment.prod.ts; then
             echo "Replacement failed."
             exit 1
