@@ -6,6 +6,7 @@ on:
       - 'tests-**'
       - 'feature/**'
       - 'feature-**'
+      - 'development'
   pull_request:
     branches: [ "development" ]
 
