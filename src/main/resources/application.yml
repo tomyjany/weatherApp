@@ -9,4 +9,4 @@ spring:
 openweather:
   apiKey: ${OPENWEATHER_API_KEY}
 frontend:
-  apiKey ${LOCAL_API_KEY}
+  apiKey: ${LOCAL_API_KEY}
