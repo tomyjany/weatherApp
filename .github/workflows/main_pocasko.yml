@@ -32,6 +32,8 @@ jobs:
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
           echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_KEY }}" >> $GITHUB_ENV
+          echo "LOCAL_API_KEY=${{ secrets.LOCAL_API_KEY }}" >> $GITHUB_ENV 
+          
           
       - name: Replace API Key in environment.prod.ts and test
         run: |

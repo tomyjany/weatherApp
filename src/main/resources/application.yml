@@ -8,3 +8,5 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 openweather:
   apiKey: ${OPENWEATHER_API_KEY}
+frontend:
+  apiKey ${LOCAL_API_KEY}
